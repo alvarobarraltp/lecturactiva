@@ -1086,14 +1086,35 @@ function desbloquearVoz(){
 }
 
 // Mapa de correcciones fonéticas para sílabas que TTS interpreta mal
+// Correcciones para sílabas que iOS pronuncia mal
+// Estrategia: separar con guion para forzar pronunciación silábica correcta
 const CORRECCIONES_FONETICAS = {
-  'na': 'nna', 'no': 'nno', 'nu': 'nnu', 'ni': 'nni',
-  'la': 'lla', 'lo': 'llo', 'le': 'lle', 'li': 'lli', 'lu': 'llu',
-  'ma': 'mma', 'me': 'mme', 'mi': 'mmi', 'mo': 'mmo', 'mu': 'mmu',
-  'pa': 'ppa', 'pe': 'ppe', 'pi': 'ppi', 'po': 'ppo', 'pu': 'ppu',
-  're': 'rre', 'ro': 'rro', 'ru': 'rru', 'ra': 'rra', 'ri': 'rri',
-  'sa': 'ssa', 'se': 'sse', 'si': 'ssi', 'so': 'sso', 'su': 'ssu',
-  'ta': 'tta', 'te': 'tte', 'ti': 'tti', 'to': 'tto', 'tu': 'ttu',
+  // Sílabas con L — "la" suena como "la." con pausa
+  'la': 'la,', 'le': 'le,', 'li': 'li,', 'lo': 'lo,', 'lu': 'lu,',
+  // Sílabas con R — "ra" puede sonar como letra
+  'ra': 'ra,', 're': 're,', 'ri': 'ri,', 'ro': 'ro,', 'ru': 'ru,',
+  // Sílabas con M
+  'ma': 'ma,', 'me': 'me,', 'mi': 'mi,', 'mo': 'mo,', 'mu': 'mu,',
+  // Sílabas con T
+  'ta': 'ta,', 'te': 'te,', 'ti': 'ti,', 'to': 'to,', 'tu': 'tu,',
+  // Sílabas con P
+  'pa': 'pa,', 'pe': 'pe,', 'pi': 'pi,', 'po': 'po,', 'pu': 'pu,',
+  // Sílabas con N — "na" = sodio en química
+  'na': 'na,', 'ne': 'ne,', 'ni': 'ni,', 'no': 'no,', 'nu': 'nu,',
+  // Sílabas con S
+  'sa': 'sa,', 'se': 'se,', 'si': 'si,', 'so': 'so,', 'su': 'su,',
+  // Sílabas con B
+  'ba': 'ba,', 'be': 'be,', 'bi': 'bi,', 'bo': 'bo,', 'bu': 'bu,',
+  // Sílabas con C/K
+  'ca': 'ca,', 'co': 'co,', 'cu': 'cu,',
+  // Sílabas con D
+  'da': 'da,', 'de': 'de,', 'di': 'di,', 'do': 'do,', 'du': 'du,',
+  // Sílabas con F
+  'fa': 'fa,', 'fe': 'fe,', 'fi': 'fi,', 'fo': 'fo,', 'fu': 'fu,',
+  // Sílabas con G
+  'ga': 'ga,', 'ge': 'ge,', 'gi': 'gi,', 'go': 'go,', 'gu': 'gu,',
+  // Sílabas con V
+  'va': 'va,', 've': 've,', 'vi': 'vi,', 'vo': 'vo,', 'vu': 'vu,',
 };
 
 function hablar(txt, r){
