@@ -2195,9 +2195,13 @@ function lotSortear(){
   if(opcDiv){
     opcDiv.style.display='block';
     opcDiv.innerHTML = `
-      <p style="font-size:14px;font-weight:800;color:#1e1b4b;margin-bottom:10px">
-        ${elegida.s} + ¿qué sílaba? → forma una palabra ${correcta.pista}
-      </p>
+      <div style="margin-bottom:14px;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px">${correcta.pista}</div>
+        <p style="font-size:18px;font-weight:800;color:#1e1b4b">
+          <span style="font-size:28px;font-weight:900;color:#3730a3">${elegida.s}</span>
+          + ¿qué sílaba? → <strong>${correcta.palabra}</strong>
+        </p>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         ${opciones.map(op=>`
           <button class="lot-opcion-btn" onclick="lotVerificar('${op}','${silabaFaltante}','${correcta.palabra}','${elegida.s}')">
