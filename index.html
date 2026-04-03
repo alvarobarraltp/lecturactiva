@@ -448,7 +448,7 @@ body{
       oninput="formatearRut(this)"
       onkeydown="if(event.key==='Enter')loginConRut()">
     <div class="login-error" id="login-error"></div>
-    <button class="login-btn" onclick="loginConRut()">🚀 Entrar</button>
+    <button class="login-btn" onclick="desbloquearVoz();loginConRut()">🚀 Entrar</button>
     <div class="login-saving" id="login-saving">
       <div class="spinner"></div> Cargando tu progreso...
     </div>
@@ -474,7 +474,7 @@ body{
       <input class="docente-clave-inp" id="clave-docente-login-inp" type="password"
         placeholder="Clave docente" maxlength="20" autocomplete="off"
         onkeydown="if(event.key==='Enter')verificarClaveDocenteLogin()">
-      <button class="docente-btn-entrar" onclick="verificarClaveDocenteLogin()">Entrar</button>
+      <button class="docente-btn-entrar" onclick="desbloquearVoz();verificarClaveDocenteLogin()">Entrar</button>
     </div>
     <div class="docente-error-msg" id="clave-docente-login-error"></div>
   </div>
@@ -492,7 +492,7 @@ body{
       <input class="docente-clave-inp" id="inv-clave-inp" type="password"
         placeholder="Clave de invitado" maxlength="20" autocomplete="off"
         onkeydown="if(event.key==='Enter')verificarClaveInvitado()">
-      <button class="docente-btn-entrar" onclick="verificarClaveInvitado()">Entrar</button>
+      <button class="docente-btn-entrar" onclick="desbloquearVoz();verificarClaveInvitado()">Entrar</button>
     </div>
     <div class="docente-error-msg" id="inv-error"></div>
   </div>
@@ -989,25 +989,21 @@ let vozNino   = null;
 
 function cargarVoces(){
   const todas = window.speechSynthesis.getVoices();
-  if(!todas.length) return;
-
-  // Buscar Paulina: nombre exacto "Paulina" o "es-MX" femenina
+  if(!todas.length){ setTimeout(cargarVoces, 300); return; }
+  // Detectar Paulina y Mónica (disponibles en este iPhone)
   vozPaulina = todas.find(v => v.name === 'Paulina')
+    || todas.find(v => v.name === 'Mónica')
     || todas.find(v => v.name.toLowerCase().includes('paulina'))
-    || todas.find(v => v.lang === 'es-MX' && v.name.toLowerCase().includes('female'))
+    || todas.find(v => v.name.toLowerCase().includes('monica'))
     || todas.find(v => v.lang === 'es-MX')
     || todas.find(v => v.lang.startsWith('es'));
-
-  // Buscar voz masculina para niño: Diego (es-MX) o cualquier masculina española
-  vozNino = todas.find(v => v.name === 'Diego')
-    || todas.find(v => v.name.toLowerCase().includes('diego'))
-    || todas.find(v => v.name.toLowerCase().includes('jorge'))
-    || todas.find(v => v.name.toLowerCase().includes('juan'))
-    || todas.find(v => v.lang.startsWith('es') && v.name !== (vozPaulina && vozPaulina.name))
+  vozNino = todas.find(v => v.name === 'Mónica' && vozPaulina?.name !== 'Mónica')
+    || todas.find(v => v.lang.startsWith('es') && v.name !== vozPaulina?.name)
     || todas.find(v => v.lang.startsWith('es'));
-
   actualizarUI_Voz();
+  console.log('Voces:', todas.filter(v=>v.lang.startsWith('es')).map(v=>v.name));
 }
+
 
 function seleccionarVoz(tipo){
   vozActual = tipo;
@@ -1025,235 +1021,57 @@ function actualizarUI_Voz(){
   }
 }
 
-function hablar(txt, r) {
-  if (!txt) return;
-  
-  // 1. Limpiar el texto para buscar el archivo (sin tildes, sin puntuación, minúsculas)
-  const slug = txt.toLowerCase()
-    .trim()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar tildes
-    .replace(/[^a-z0-9]/g, "_")                       // Espacios y raros a _
-    .replace(/_+/g, "_");                             // Evitar múltiples ___
-    
-  // Intentar determinar si es sílaba o palabra por longitud (heurística simple)
-  let prefijo = (txt.length <= 3) ? 'sil_' : (txt.split(' ').length > 1 ? 'fra_' : 'pal_');
-  const rutaAudio = `audio/${prefijo}${slug}.mp3`;
+// ── Sistema de Audio iOS (Paulina/Mónica detectadas) ──────
+let vozPaulinaEl = null;
+let vozNinoEl = null;
+let _desbloqueado = false;
 
-  const audioReal = new Audio(rutaAudio);
-  
-  // Intentar reproducir audio real
-  audioReal.play().then(() => {
-    // Si funciona, genial, no hacemos nada más.
-    console.log("Reproduciendo voz real:", rutaAudio);
-  }).catch(() => {
-    // Si falla (no existe el archivo), usamos TTS como respaldo
-    usarTTS(txt, r);
-  });
+function desbloquearVoz(){
+  if(_desbloqueado) return;
+  _desbloqueado = true;
+  try {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0.001;
+    window.speechSynthesis.speak(u);
+  } catch(e){}
+  const av = document.getElementById('aviso-audio');
+  if(av) av.style.display = 'none';
 }
 
-function usarTTS(txt, r) {
+function hablar(txt, r){
+  if(!txt || !txt.trim()) return;
   if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  
-  let t = txt.toLowerCase().trim();
-  
-  // MAPEO FONÉTICO PARA EVITAR ERRORES PEDAGÓGICOS
-  // Aquí corregimos los casos donde el sistema "se cree muy listo"
-  const correcciones = {
-    'gui': 'guí',       // Evita que deletree "ge-u-i"
-    'to': 'tó ',       // Evita que suene "tu"
-    'que': 'ké',       // Evita que deletree "cu-u-e"
-    'sa': 'sah',       // Evita "Sábado" (SA) usando H muda
-    'ya': 'llá',       // Evita "I-griega A" (YA) y que suene "ia"
-    'ne': 'né.',       // Evita "Noreste" (NE)
-    'na': 'ná.',       // Evita "Sodio" (Na)
-    'no': 'nó.',       // Evita "Noroeste" (NO)
-    'se': 'sé.',       // Evita "Sureste" (SE)
-    'so': 'só.',       // Evita "Sudoeste" (SO)
-    'va': 'vá ',       // Por si acaso
-    'ma': 'má ',       // Por si acaso
-    'pa': 'pá '        // Por si acaso
-  };
 
-  if(correcciones[t]) {
-    t = correcciones[t];
-  } else if(t.length <= 3) {
-    // Si no está en la lista pero es corta, aplicamos el truco de la tilde
-    t = t.replace('a', 'á').replace('e', 'é').replace('i', 'í').replace('o', 'ó').replace('u', 'ú');
-  }
-  
-  const u = new SpeechSynthesisUtterance(t);
+  try { window.speechSynthesis.cancel(); } catch(e){}
+
+  const u = new SpeechSynthesisUtterance(txt);
   u.lang = 'es-MX';
-  u.rate  = Math.min(r || velocidad, 0.6);
-  if(vozActual === 'paulina'){
-    u.pitch = 1.1;
-    if(vozPaulina) u.voice = vozPaulina;
-  } else {
-    u.pitch = 1.55;
-    u.rate  = Math.min(u.rate, 0.55);
-    if(vozNino) u.voice = vozNino;
+  u.rate = Math.min(r || velocidad || 0.5, 0.55);
+  u.volume = 1;
+  u.pitch = (vozActual === 'nino') ? 1.3 : 1.0;
+
+  // Usar voces detectadas
+  const voces = window.speechSynthesis.getVoices();
+  if(voces.length){
+    let v = null;
+    if(vozActual === 'paulina'){
+      v = voces.find(v => v.name === 'Paulina')
+        || voces.find(v => v.name === 'Mónica')
+        || voces.find(v => v.name.toLowerCase().includes('paulina'))
+        || voces.find(v => v.name.toLowerCase().includes('monica'))
+        || voces.find(v => v.lang === 'es-MX')
+        || voces.find(v => v.lang.startsWith('es'));
+    } else {
+      v = voces.find(v => v.lang.startsWith('es') && v !== voces.find(x=>x.name==='Paulina'))
+        || voces.find(v => v.lang.startsWith('es'));
+    }
+    if(v) u.voice = v;
   }
+
+  u.onerror = e => { if(e.error !== 'interrupted') console.warn('TTS:', e.error); };
   window.speechSynthesis.speak(u);
 }
 
-
-window.speechSynthesis.onvoiceschanged = cargarVoces;
-setTimeout(cargarVoces, 400);
-setTimeout(cargarVoces, 1200);
-
-// ── Sección Asociar: conectar sílabas para formar palabras ──
-let asocPalabras=[], asocIdx=0, asocPuntos=0, asocDerechaSel=null, asocIzqSel=null;
-
-function obtenerPalabrasAsociar(d){
-  // Obtener 5 palabras de 2 sílabas del banco del día
-  const sils = d.silabas.map(s=>s.s);
-  const candidatas = [];
-  sils.forEach(sil=>{
-    const banco = BANCO_PALABRAS[sil]||[];
-    banco.forEach(p=>{
-      if(p.silabas.length===2 && !candidatas.find(c=>c.palabra===p.palabra)){
-        candidatas.push(p);
-      }
-    });
-  });
-  // Mezclar y tomar 5
-  return candidatas.sort(()=>Math.random()-.5).slice(0,5);
-}
-
-function renderAsociar(){
-  const sec = document.getElementById('sec-asociar');
-  if(!sec) return;
-  const d = DIAS[diaActual];
-  asocPalabras = obtenerPalabrasAsociar(d);
-  asocIdx=0; asocPuntos=0; asocDerechaSel=null; asocIzqSel=null;
-  if(!asocPalabras.length){
-    sec.innerHTML='<div class="card"><p style="font-size:18px;color:#6b7280">No hay palabras disponibles para este día.</p></div>';
-    return;
-  }
-  sec.innerHTML = renderJuegoAsociar();
-}
-
-function renderJuegoAsociar(){
-  const log = getSecLogradas().includes('asociar');
-  const palabras = asocPalabras;
-  if(!palabras.length) return '<div class="card"><p>Sin palabras.</p></div>';
-
-  // Columna izquierda: primeras sílabas (mezcladas)
-  const izq = [...palabras].sort(()=>Math.random()-.5).map((p,i)=>({sil:p.silabas[0], palabra:p.palabra, idx:i}));
-  // Columna derecha: segundas sílabas (mezcladas diferente)
-  const der = [...palabras].sort(()=>Math.random()-.5).map((p,i)=>({sil:p.silabas[1], palabra:p.palabra, idx:i}));
-
-  // Guardar en window para acceso global
-  window._asocIzq = izq;
-  window._asocDer = der;
-  window._asocEmparejadas = new Set();
-  window._asocDerechaSel = null;
-
-  const dotsHtml = palabras.map((_,i)=>`<div class="asoc-prog-dot" id="asoc-dot-${i}">${i+1}</div>`).join('');
-  const izqHtml = izq.map((item,i)=>`<div class="asoc-sil" id="asoc-izq-${i}" onclick="asocTocarIzq(${i},'${item.palabra}')">${item.sil}</div>`).join('');
-  const derHtml = der.map((item,i)=>`<div class="asoc-sil" id="asoc-der-${i}" onclick="asocTocarDer(${i},'${item.palabra}')">${item.sil}</div>`).join('');
-
-  return`<div class="card">
-    <div class="card-title">🔗 Asocia las sílabas para formar palabras</div>
-    <p style="font-size:18px;color:#374151;margin-bottom:16px;font-weight:700;">
-      1️⃣ Toca una sílaba de la <strong>derecha</strong><br>
-      2️⃣ Luego toca la sílaba de la <strong>izquierda</strong> que la completa
-    </p>
-    <div class="asoc-progreso">${dotsHtml}</div>
-    <div id="asoc-resultado" class="asoc-resultado"></div>
-    <div class="asoc-wrap">
-      <div class="asoc-col">
-        <div class="asoc-col-titulo">← Izquierda</div>
-        ${izqHtml}
-      </div>
-      <div class="asoc-col">
-        <div class="asoc-col-titulo">Derecha →</div>
-        ${derHtml}
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:16px;">
-      <button class="btn-verificar" onclick="renderAsociar()">🔄 Nuevo juego</button>
-    </div>
-    <div class="sec-logrado-wrap" style="margin-top:16px">
-      <button class="btn-sec-logrado${log?' hecho':''}" onclick="confirmarLogrado('asociar','¡Excelente! Asociaste las sílabas correctamente.')">
-        ${log?'✅ ¡Logrado!':'🏅 ¡Logré asociar!'}
-      </button>
-    </div>
-  </div>`;
-}
-
-function asocTocarDer(idx, palabra){
-  const el = document.getElementById('asoc-der-'+idx);
-  if(!el || el.classList.contains('correcta')) return;
-  // Deseleccionar anterior derecha
-  document.querySelectorAll('.asoc-col:last-child .asoc-sil').forEach(b=>{
-    if(!b.classList.contains('correcta')) b.classList.remove('seleccionada');
-  });
-  window._asocDerechaSel = {idx, palabra};
-  el.classList.add('seleccionada');
-  hablar(window._asocDer[idx].sil, velocidad);
-  // Limpiar resultado
-  const res = document.getElementById('asoc-resultado');
-  if(res){ res.style.display='none'; res.className='asoc-resultado'; }
-}
-
-function asocTocarIzq(idx, palabra){
-  const el = document.getElementById('asoc-izq-'+idx);
-  if(!el || el.classList.contains('correcta')) return;
-  if(!window._asocDerechaSel){
-    mostrarBurbuja('👉 Primero toca una sílaba de la derecha');
-    return;
-  }
-  hablar(window._asocIzq[idx].sil, velocidad);
-  const der = window._asocDerechaSel;
-  const res = document.getElementById('asoc-resultado');
-  // Verificar si forman una palabra válida
-  const silIzq = window._asocIzq[idx].sil;
-  const silDer = window._asocDer[der.idx].sil;
-  // Buscar si existe una palabra con estas dos sílabas
-  const palabraFormada = asocPalabras.find(p=>
-    p.silabas[0]===silIzq && p.silabas[1]===silDer
-  );
-
-  if(palabraFormada){
-    // ¡Correcto!
-    el.classList.add('correcta');
-    document.getElementById('asoc-der-'+der.idx).classList.remove('seleccionada');
-    document.getElementById('asoc-der-'+der.idx).classList.add('correcta');
-    asocPuntos++;
-    puntos+=4; guardar();
-    const pts=document.getElementById('pts');
-    if(pts) pts.textContent='⭐ '+puntos;
-    // Marcar progreso
-    const dot = document.getElementById('asoc-dot-'+(asocPuntos-1));
-    if(dot) dot.className='asoc-prog-dot ok';
-    if(res){
-      res.style.display='block';
-      res.className='asoc-resultado ok';
-      res.innerHTML='✅ ¡Correcto! <span class="asoc-palabra-formada">'+silIzq+silDer+' = '+palabraFormada.palabra.toUpperCase()+'</span> +4⭐';
-    }
-    felicitar('✅ ¡Muy bien!','¡Muy bien '+(nombreAlumna||'')+', la palabra es '+palabraFormada.palabra+'!');
-    window._asocDerechaSel=null;
-    // Si completó todas
-    if(asocPuntos===asocPalabras.length){
-      setTimeout(()=>{
-        mostrarBurbuja('🏆 ¡Completaste todas las palabras!');
-        hablar('¡Felicitaciones '+(nombreAlumna||'')+', completaste todas las palabras!',velocidad);
-      },1500);
-    }
-  } else {
-    // Incorrecto
-    el.classList.add('incorrecta');
-    setTimeout(()=>el.classList.remove('incorrecta'),800);
-    if(res){
-      res.style.display='block';
-      res.className='asoc-resultado error';
-      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta de nuevo!';
-    }
-    hablar('Intenta de nuevo',velocidad);
-    // Mantener derecha seleccionada para reintentar
-  }
-}
 
 function renderReporte(){
   const sec = document.getElementById('sec-reporte');
@@ -2629,6 +2447,16 @@ function avanzarDiaDocente(){
 }
 
 // La app espera el login. Si ya hay sesión en localStorage la restaura.
+// Desbloquear audio en cada toque - iOS requiere esto
+document.addEventListener('touchstart', desbloquearVoz, {passive:true});
+document.addEventListener('click', desbloquearVoz, {passive:true});
+
+// Cargar voces con reintentos
+if(window.speechSynthesis){
+  window.speechSynthesis.onvoiceschanged = cargarVoces;
+  [100, 500, 1000, 2000, 3000].forEach(t => setTimeout(cargarVoces, t));
+}
+
 const sesionGuardada = localStorage.getItem('bin_sesion');
 if(sesionGuardada){
   binIdActual = sesionGuardada;
