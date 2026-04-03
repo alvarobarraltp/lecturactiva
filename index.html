@@ -333,6 +333,12 @@ body{
 .asoc-prog-dot{width:36px;height:36px;border-radius:50%;border:3px solid #6b7280;background:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#6b7280;}
 .asoc-prog-dot.ok{background:#065f46;border-color:#065f46;color:white;}
 .asoc-prog-dot.activo{border-color:#3730a3;color:#3730a3;background:#e0e7ff;}
+.escrit-item{margin-bottom:28px;border-radius:20px;border:4px solid #c7d2fe;background:#f8f7ff;padding:20px 22px;}
+.escrit-item:has(.dict-resultado.ok){border-color:#065f46;background:#f0fdf4;}
+.escrit-input{width:100%;padding:18px 20px;border:4px solid #6b7280;border-radius:18px;font-size:24px;font-weight:700;outline:none;transition:border .2s;background:white;color:#111827;font-family:inherit;resize:vertical;min-height:100px;line-height:1.6;}
+.escrit-input:focus{border-color:#3730a3;box-shadow:0 0 0 4px rgba(55,48,163,.15);}
+.escrit-input.ok{border-color:#065f46;background:#d1fae5;color:#065f46;}
+.escrit-input.error{border-color:#991b1b;background:#fee2e2;color:#991b1b;}
 @media(max-width:600px){
   .silaba-grid{grid-template-columns:repeat(3,1fr);}
   .tab-btn{min-width:80px;padding:14px 4px;font-size:15px;}
@@ -1664,6 +1670,7 @@ function renderDia(){
       <button class="tab-btn" id="tab-btn-lectura" onclick="cambiarSec('lectura',this)"><div style="font-size:26px;margin-bottom:4px">📖</div>Lectura<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-armar" onclick="cambiarSec('armar',this)"><div style="font-size:26px;margin-bottom:4px">✏️</div>Armar<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-dictado" onclick="cambiarSec('dictado',this)"><div style="font-size:26px;margin-bottom:4px">📝</div>Dictado<span class="tab-check"></span></button>
+      <button class="tab-btn" id="tab-btn-escritura" onclick="cambiarSec('escritura',this)"><div style="font-size:26px;margin-bottom:4px">✍️</div>Escritura<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-discriminar" onclick="cambiarSec('discriminar',this)"><div style="font-size:26px;margin-bottom:4px">🔍</div>Discriminar<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-loteria" onclick="cambiarSec('loteria',this)"><div style="font-size:26px;margin-bottom:4px">🎲</div>Lotería<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-asociar" onclick="cambiarSec('asociar',this);renderAsociar()"><div style="font-size:26px;margin-bottom:4px">🔗</div>Asociar<span class="tab-check"></span></button>
@@ -1675,6 +1682,7 @@ function renderDia(){
     <div id="sec-lectura" class="seccion">${htmlLectura(d)}</div>
     <div id="sec-armar" class="seccion">${htmlArmarPalabra(d)}</div>
     <div id="sec-dictado" class="seccion">${htmlDictado(d)}</div>
+    <div id="sec-escritura" class="seccion">${htmlEscritura(d)}</div>
     <div id="sec-discriminar" class="seccion">${htmlDiscriminacion(d)}</div>
     <div id="sec-loteria" class="seccion">${htmlLoteria(d)}</div>
     <div id="sec-asociar" class="seccion"></div>
@@ -1692,7 +1700,7 @@ function renderDia(){
 }
 
 // Orden obligatorio de secciones
-const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','discriminar','loteria','asociar'];
+const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','escritura','discriminar','loteria','asociar'];
 
 function getSecLogradas(){
   return JSON.parse(localStorage.getItem('sec_'+diaActual)||'[]');
@@ -1733,24 +1741,27 @@ function cambiarSec(id, btn){
 function marcarSecLograda(sec){
   setSecLograda(sec);
   actualizarTabs();
-  // Pasar automáticamente a la siguiente sección
   const idx = ORDEN_SECS.indexOf(sec);
   const siguiente = ORDEN_SECS[idx+1];
   if(siguiente){
-    const nombres = {silabas:'Sílabas',lectura:'Lectura',dictado:'Dictado',ejercicio:'Ejercicio',loteria:'Lotería'};
+    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar',escritura:'Escritura'};
     const nombreSig = nombres[siguiente] || siguiente;
     const nom = nombreAlumna || '';
-    hablar('¡Muy bien'+(nom?', '+nom:'')+'! Ahora vamos a '+nombreSig, velocidad);
+    // Solo aquí se dice el nombre — al inicio de cada nueva sección
+    const msg = nom
+      ? nom + ', ahora vamos a ' + nombreSig
+      : 'Ahora vamos a ' + nombreSig;
+    hablar(msg, velocidad);
     setTimeout(()=>{
       const btn = document.getElementById('tab-btn-'+siguiente);
       if(btn) btn.click();
-    }, 1800);
+    }, 2000);
   } else {
-    // Completó todas las secciones del día
     completar();
   }
   actualizarTabs();
 }
+
 
 function actualizarTabs(){
   const logradas = getSecLogradas();
@@ -1847,7 +1858,80 @@ function htmlLectura(d){
   </div>`;
 }
 
+function seccionCompletada(sec){
+  const d = DIAS[diaActual];
+  switch(sec){
+    case 'armar':
+      // Debe haber completado todos los ejercicios
+      if(armarIdx < d.ejercicios.length){
+        mostrarBurbuja('⚠️ Completa todos los ejercicios primero (' + armarIdx + '/' + d.ejercicios.length + ')');
+        hablar('Debes completar todos los ejercicios', velocidad);
+        return false;
+      }
+      return true;
+    case 'dictado':
+      // Debe haber respondido todas las palabras
+      const totalDict = d.palabrasDictado ? d.palabrasDictado.length : 0;
+      const dictItems = document.querySelectorAll('.dict-item.correcta, .dict-item.incorrecta');
+      if(dictItems.length < totalDict){
+        mostrarBurbuja('⚠️ Completa todo el dictado primero (' + dictItems.length + '/' + totalDict + ')');
+        hablar('Debes completar el dictado completo', velocidad);
+        return false;
+      }
+      return true;
+    case 'discriminar':
+      // Debe haber completado todas las preguntas
+      if(discIdx < discPreguntas.length){
+        mostrarBurbuja('⚠️ Completa todas las preguntas (' + discIdx + '/' + discPreguntas.length + ')');
+        hablar('Debes responder todas las preguntas', velocidad);
+        return false;
+      }
+      return true;
+    case 'loteria':
+      // Debe haber jugado al menos 3 rondas
+      if(lotPuntosRonda < 3){
+        mostrarBurbuja('⚠️ Juega al menos 3 rondas primero (' + lotPuntosRonda + '/3)');
+        hablar('Juega al menos tres rondas', velocidad);
+        return false;
+      }
+      return true;
+    case 'asociar':
+      // Debe haber completado al menos 3 pares
+      const asocOk = document.querySelectorAll('.asoc-sil.correcta').length;
+      const asocTotal = window._asocDer ? window._asocDer.length : 5;
+      if(asocOk < Math.min(3, asocTotal)){
+        mostrarBurbuja('⚠️ Completa más asociaciones (' + asocOk + '/' + asocTotal + ')');
+        hablar('Debes completar más asociaciones', velocidad);
+        return false;
+      }
+      return true;
+    case 'silabas':
+      // Debe haber tocado al menos la mitad de las sílabas
+      const silTouch = parseInt(sessionStorage.getItem('sil_tocadas_'+diaActual)||'0');
+      const silTotal = d.silabas ? d.silabas.length : 1;
+      if(silTouch < Math.ceil(silTotal/2)){
+        mostrarBurbuja('⚠️ Toca más sílabas primero (' + silTouch + '/' + silTotal + ')');
+        hablar('Toca más sílabas antes de continuar', velocidad);
+        return false;
+      }
+      return true;
+    case 'escritura':
+      // Debe haber verificado al menos 1 frase
+      const escritOk = document.querySelectorAll('.dict-resultado.ok').length;
+      if(escritOk < 1){
+        mostrarBurbuja('⚠️ Escucha y escribe al menos una frase');
+        hablar('Escucha y escribe al menos una frase',velocidad);
+        return false;
+      }
+      return true;
+    default:
+      return true; // lectura, palabradia: siempre permitir
+  }
+}
+
 function confirmarLogrado(sec, msgVoz){
+  // Validar que la sección esté realmente completada
+  if(!seccionCompletada(sec)) return;
   const nom = nombreAlumna || '';
   // Actualizar estado
   setSecLograda(sec);
@@ -1863,7 +1947,7 @@ function confirmarLogrado(sec, msgVoz){
     }
   });
   // Felicitar y pasar a siguiente
-  felicitar('🏅 +5⭐ ' + msgVoz, msgVoz.replace('¡', '¡'+(nom?nom+', ':'')) );
+  felicitar('🏅 +5⭐ ' + msgVoz, msgVoz);
   setTimeout(()=> marcarSecLograda(sec), 1600);
 }
 
@@ -2025,13 +2109,9 @@ function htmlDictado(d){
     </p>
     <div class="dict-progreso">${dots}</div>
     ${pw}
-    <div class="card-title" style="margin-top:20px">🗣 Dictado de frases</div>
-    <p style="font-size:16px;color:#9ca3af;margin-bottom:12px">Escucha la frase completa y escríbela tal como la escuchaste.</p>
-    ${fw}
     <div class="dict-resumen" id="dict-resumen">
       <h3></h3>
       <p>¡Completaste todo el dictado del día!</p>
-      <button class="btn-siguiente" style="margin-top:10px" onclick="completar()">✅ Marcar día como completado</button>
     </div>
     <div class="sec-logrado-wrap" style="margin-top:16px">
       <button class="btn-sec-logrado" id="btn-logrado-dictado" onclick="confirmarLogrado('dictado','¡Excelente! Completaste el dictado.')">🏅 ¡Logré el dictado!</button>
@@ -2039,12 +2119,84 @@ function htmlDictado(d){
   </div>`;
 }
 
+function htmlEscritura(d){
+  const frases = d.frases || [];
+  const log = getSecLogradas().includes('escritura');
+  const fw = frases.map((f,i)=>`
+    <div class="escrit-item" id="eitem_${i}">
+      <div class="dict-num">Frase ${i+1} de ${frases.length}</div>
+      <button class="dict-btn-escuchar" onclick="hablar('${f.replace(/'/g,"\\'")}',velocidad)">
+        🔊 Escuchar frase ${i+1}
+      </button>
+      <textarea class="escrit-input" id="einp_${i}"
+        placeholder="Escribe aquí la frase completa..."
+        autocomplete="off" autocorrect="off" spellcheck="false"
+        rows="3"></textarea>
+      <div class="dict-acciones" style="margin-top:10px;">
+        <button class="dict-btn-check" onclick="verificarFraseEscritura(${i},'${f.replace(/'/g,"\\'")}')">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar('${f.replace(/'/g,"\\'")}',velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar('${f.replace(/'/g,"\\'")}',velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="eres_${i}"></div>
+    </div>`).join('');
+
+  return`<div class="card">
+    <div class="card-title">🗣 Escritura de Frases</div>
+    ${panelVoz()}
+    <p style="font-size:18px;color:#374151;margin-bottom:18px;font-weight:700;">
+      Escucha cada frase completa y escríbela en el cuadro.
+    </p>
+    ${fw}
+    <div class="sec-logrado-wrap" style="margin-top:16px">
+      <button class="btn-sec-logrado${log?' hecho':''}" onclick="confirmarLogrado('escritura','¡Muy bien! Completaste la escritura de frases.')">
+        ${log?'✅ ¡Logrado!':'🏅 ¡Logré la escritura!'}
+      </button>
+    </div>
+  </div>`;
+}
+
+function verificarFraseEscritura(i, frase){
+  const inp = document.getElementById('einp_'+i);
+  const res = document.getElementById('eres_'+i);
+  const item = document.getElementById('eitem_'+i);
+  if(!inp || !res) return;
+  const resp = inp.value.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ');
+  const correct = frase.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ');
+  const ok = resp === correct;
+  res.style.display='block';
+  if(ok){
+    res.className='dict-resultado ok';
+    res.textContent='✅ ¡Correcto! Muy bien'+( nombreAlumna?', '+nombreAlumna:'')+'.';
+    inp.className='dict-input ok';
+    if(item) item.style.borderColor='#065f46';
+    puntos+=5; guardar();
+    const pts=document.getElementById('pts');
+    if(pts) pts.textContent='⭐ '+puntos;
+    felicitar('✅ ¡Frase correcta!','¡Muy bien! Frase correcta.');
+    // Bloquear para no repetir
+    inp.disabled=true;
+    document.querySelectorAll('#eitem_'+i+' button').forEach(b=>{
+      if(!b.classList.contains('dict-btn-repetir')) b.disabled=true;
+    });
+  } else {
+    res.className='dict-resultado error';
+    res.innerHTML='❌ No es exacta. Escucha de nuevo e intenta otra vez.<br><small style="color:#6b7280">Pista: la frase tiene '+frase.split(' ').length+' palabras</small>';
+    inp.className='dict-input error';
+    hablar('Escucha de nuevo e intenta otra vez',velocidad);
+    setTimeout(()=>{inp.className='dict-input';},1500);
+  }
+}
+
 function completar(){
   diasComp.add(diaActual);puntos+=10;guardar();buildNav();
   const el=document.getElementById('pts');
   if(el)el.textContent='⭐ '+puntos;
   const msgDia = '¡Muy bien'+(nombreAlumna?', '+nombreAlumna:'')+'! Completaste el Día '+(diaActual+1)+'. Ganaste 10 estrellas ⭐';
-  felicitar(msgDia, '¡Muy bien '+(nombreAlumna||'')+', completaste el día '+(diaActual+1)+'! ¡Eres increíble!');
+  felicitar(msgDia, '¡Muy bien! Completaste el día '+(diaActual+1)+'. ¡Eres increíble!');
 }
 
 function htmlEjercicio(d,idx){
@@ -2218,7 +2370,7 @@ function lotVerificar(elegida, correcta, palabra, silBase){
       resDiv.className='lot-resultado ok';
       resDiv.textContent='✅ ¡Correcto! La palabra es: '+palabra+' +3⭐';
     }
-    felicitar('✅ ¡Correcto! La palabra es: '+palabra, '¡Muy bien '+(nombreAlumna||'')+', la palabra es '+palabra);
+    felicitar('✅ ¡Correcto! La palabra es: '+palabra, '¡Muy bien! La palabra es '+palabra);
   } else {
     if(resDiv){
       resDiv.style.display='block';
@@ -2336,7 +2488,7 @@ function verificarDisc(elegida,correcta){
     const pts=document.getElementById('pts');if(pts)pts.textContent='⭐ '+puntos;
     document.querySelectorAll('.disc-btn').forEach(b=>{if(b.textContent.trim()===correcta)b.classList.add('ok');});
     if(resEl){resEl.className='disc-resultado ok';resEl.textContent='✅ ¡Correcto! +2⭐';}
-    felicitar('✅ ¡Correcto! La sílaba es '+correcta,'¡Muy bien '+(nombreAlumna||'')+', la sílaba es '+correcta,false);
+    felicitar('✅ ¡Correcto! La sílaba es '+correcta,'¡Muy bien! La sílaba es '+correcta,false);
   } else {
     document.querySelectorAll('.disc-btn').forEach(b=>{if(b.textContent.trim()===correcta)b.classList.add('ok');else if(b.textContent.trim()===elegida)b.classList.add('error');});
     if(resEl){resEl.className='disc-resultado error';resEl.textContent='❌ Era: '+correcta+'. ¡Sigue intentando!';}
@@ -2369,18 +2521,29 @@ function renderArmarEj(d,idx){
   const ej=d.ejercicios[idx];armarFormada=[];
   const banco=[...new Set(ej.opciones)].sort(()=>Math.random()-.5);
   const prog=Math.round((idx/d.ejercicios.length)*100);
-  hablar(ej.palabra,velocidad);
+  const instruccion = 'Forma la palabra ' + ej.palabra;
+  // Guardar instrucción para leer al tocar el botón
+  window._armarInstruccion = instruccion;
+  window._armarPalabra = ej.palabra;
   return`<div>
     <div class="progreso-bar-wrap"><div class="progreso-bar" style="width:${prog}%"></div></div>
-    <p style="font-size:16px;color:#6b7280;margin-bottom:6px">Ejercicio ${idx+1} de ${d.ejercicios.length}</p>
-    <p style="font-size:17px;font-weight:800;margin-bottom:4px">Forma la palabra: <span style="color:#4f46e5">${ej.palabra.toUpperCase()}</span></p>
-    <p class="armar-pista">🔊 Escucha y toca las sílabas en orden</p>
-    <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:14px">Toca las sílabas...</span></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${banco.map(op=>`<button class="armar-sil-opcion" id="armar_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}')">${op}</button>`).join('')}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <p style="font-size:16px;color:#6b7280;margin-bottom:8px">Ejercicio ${idx+1} de ${d.ejercicios.length}</p>
+    <div style="background:#e0e7ff;border:4px solid #3730a3;border-radius:20px;padding:20px;text-align:center;margin-bottom:18px;">
+      <p style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:14px;">
+        Forma la palabra: <span style="font-size:32px;color:#3730a3;letter-spacing:3px;">${ej.palabra.toUpperCase()}</span>
+      </p>
+      <button onclick="hablar(window._armarInstruccion, velocidad)"
+        style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">
+        🔊 Escuchar instrucción
+      </button>
+    </div>
+    <p class="armar-pista">Toca las sílabas en el orden correcto 👇</p>
+    <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map(op=>`<button class="armar-sil-opcion" id="armar_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}')">${op}</button>`).join('')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-verificar" onclick="verificarArmar('${ej.palabra}','${ej.silabas.join('-')}',${idx})">✅ Verificar</button>
-      <button class="speed-btn" onclick="hablar('${ej.palabra}',velocidad)">🔊 Escuchar</button>
-      <button class="speed-btn" onclick="armarFormada=[];document.getElementById('armar-zona').innerHTML='<span style=color:#9ca3af;font-size:14px>Toca las sílabas...</span>';document.querySelectorAll('.armar-sil-opcion').forEach(b=>b.disabled=false)">🗑 Borrar</button>
+      <button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar palabra</button>
+      <button class="speed-btn" onclick="armarFormada=[];document.getElementById('armar-zona').innerHTML='<span style=color:#9ca3af;font-size:18px>Toca las sílabas...</span>';document.querySelectorAll('.armar-sil-opcion').forEach(b=>b.disabled=false)">🗑 Borrar</button>
     </div>
     <div id="armar-fb" class="feedback"></div>
   </div>`;
