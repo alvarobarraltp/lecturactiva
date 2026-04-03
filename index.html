@@ -103,7 +103,7 @@ body{
 .sil.playing{border-color:#92400e;background:#fef3c7;transform:scale(1.1) translateY(-3px);}
 .sil .emoji{font-size:36px;display:block;margin-bottom:6px;}
 .sil .txt{font-size:30px;font-weight:900;color:#1e1b4b;letter-spacing:1px;}
-.sil .pal{font-size:14px;color:#374151;margin-top:4px;font-weight:700;}
+.sil .pal{font-size:16px;color:#374151;margin-top:4px;font-weight:700;}
 
 /* VELOCIDAD */
 .speed-ctrl{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
@@ -118,7 +118,7 @@ body{
 .tab-btn.activo{background:#1e1b4b;color:white;border-color:#1e1b4b;box-shadow:0 6px 18px rgba(30,27,75,.35);transform:translateY(-3px);}
 .seccion{display:none;}
 .seccion.activa{display:block;}
-.tab-check{font-size:13px;vertical-align:super;}
+.tab-check{font-size:16px;vertical-align:super;}
 
 /* LECTURA */
 .texto-lectura{font-size:26px;line-height:2.6;font-weight:700;color:#111827;letter-spacing:.3px;}
@@ -333,7 +333,7 @@ body{
   <div style="flex:1;">
     <h1>Lectura Activa</h1>
     <p>Método de los 20 Días &nbsp;|&nbsp; Liceo Técnico Profesional Río Bueno</p>
-    <p style="font-size:12px;opacity:.7;margin-top:2px">Creador: Álvaro Barra Sáez</p>
+    <p style="font-size:16px;opacity:.7;margin-top:2px">Creador: Álvaro Barra Sáez</p>
     <p class="header-nombre" id="header-nombre" style="display:none">✨ <span id="header-nombre-txt"></span></p>
     <div id="banner-invitado" style="display:none;background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.5);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;color:#fef3c7;margin-top:4px;">👁 MODO INVITADO — el progreso no se guarda</div>
   </div>
@@ -436,10 +436,10 @@ body{
       <div class="spinner"></div> Cargando tu progreso...
     </div>
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e7eb;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
-      <button onclick="abrirLoginDocente()" style="background:none;border:none;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:underline;">
+      <button onclick="abrirLoginDocente()" style="background:none;border:none;color:#6b7280;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:underline;">
         🔐 Acceso Creador
       </button>
-      <button onclick="abrirLoginInvitado()" style="background:none;border:none;color:#059669;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:underline;">
+      <button onclick="abrirLoginInvitado()" style="background:none;border:none;color:#059669;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:underline;">
         👁 Modo invitado
       </button>
     </div>
@@ -452,7 +452,7 @@ body{
     <button class="docente-btn-cerrar" onclick="document.getElementById('modal-clave-docente').style.display='none'">✕</button>
     <span class="modal-emoji">🔐</span>
     <h2 style="font-size:20px;font-weight:900;color:#1e1b4b;margin-bottom:4px;">Acceso Creador</h2>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:18px;">Álvaro Barra Sáez</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:18px;">Álvaro Barra Sáez</p>
     <div class="docente-clave-wrap">
       <input class="docente-clave-inp" id="clave-docente-login-inp" type="password"
         placeholder="Clave docente" maxlength="20" autocomplete="off"
@@ -469,8 +469,8 @@ body{
     <button class="docente-btn-cerrar" onclick="document.getElementById('modal-invitado').style.display='none'">✕</button>
     <span class="modal-emoji">👁</span>
     <h2 style="font-size:20px;font-weight:900;color:#1e1b4b;margin-bottom:4px;">Modo Invitado</h2>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:6px;">Puedes explorar los 20 días completos.</p>
-    <p style="font-size:12px;color:#f59e0b;font-weight:700;margin-bottom:18px;">⚠ El progreso no se guarda al salir.</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:6px;">Puedes explorar los 20 días completos.</p>
+    <p style="font-size:16px;color:#f59e0b;font-weight:700;margin-bottom:18px;">⚠ El progreso no se guarda al salir.</p>
     <div class="docente-clave-wrap">
       <input class="docente-clave-inp" id="inv-clave-inp" type="password"
         placeholder="Clave de invitado" maxlength="20" autocomplete="off"
@@ -1159,8 +1159,8 @@ function renderReporte(){
 
     <div style="margin-bottom:18px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-        <span style="font-size:13px;font-weight:800;color:#1e1b4b;">Progreso general</span>
-        <span style="font-size:13px;font-weight:800;color:#4f46e5;">${completados}/${totalDias} días</span>
+        <span style="font-size:16px;font-weight:800;color:#1e1b4b;">Progreso general</span>
+        <span style="font-size:16px;font-weight:800;color:#4f46e5;">${completados}/${totalDias} días</span>
       </div>
       <div class="rep-progreso-barra">
         <div class="rep-progreso-fill" style="width:${pct}%"></div>
@@ -1441,21 +1441,21 @@ function renderPanelDocente(){
         </div>
         <div style="text-align:right">
           <div style="font-size:22px;font-weight:900;color:${color}">⭐${puntos}</div>
-          <div style="font-size:12px;color:#6b7280">${diasComp}/20 días</div>
+          <div style="font-size:16px;color:#6b7280">${diasComp}/20 días</div>
         </div>
       </div>
       <div class="alumna-prog-barra"><div class="alumna-prog-fill" style="width:${pct}%"></div></div>
       <div style="font-size:11px;color:#6b7280;text-align:right;margin-bottom:6px">${pct}% completado</div>
       <div class="alumna-dias-grid">${diasDots}</div>
       <div style="margin-top:12px">
-        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px">📝 Observaciones del docente</div>
+        <div style="font-size:16px;font-weight:700;color:#374151;margin-bottom:4px">📝 Observaciones del docente</div>
         <textarea class="pdoc-obs-area" id="obs_${idx}" placeholder="Escribe observaciones sobre ${a.nombre}..."
           onchange="guardarObsDocente(${idx},this.value)">${obsVal}</textarea>
       </div>
       <div class="alumna-acciones">
-        <button class="docente-btn-gris" onclick="editarAlumna(${idx})" style="font-size:12px;padding:7px 12px">✏️ Editar datos</button>
-        <button class="docente-btn-rojo" onclick="reiniciarAlumna(${idx})" style="font-size:12px;padding:7px 12px">🗑 Reiniciar progreso</button>
-        ${idx>=ALUMNAS_DB.length?`<button class="docente-btn-rojo" onclick="eliminarAlumna(${idx})" style="font-size:12px;padding:7px 12px">❌ Eliminar alumna</button>`:''}
+        <button class="docente-btn-gris" onclick="editarAlumna(${idx})" style="font-size:16px;padding:7px 12px">✏️ Editar datos</button>
+        <button class="docente-btn-rojo" onclick="reiniciarAlumna(${idx})" style="font-size:16px;padding:7px 12px">🗑 Reiniciar progreso</button>
+        ${idx>=ALUMNAS_DB.length?`<button class="docente-btn-rojo" onclick="eliminarAlumna(${idx})" style="font-size:16px;padding:7px 12px">❌ Eliminar alumna</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1693,9 +1693,9 @@ function renderDia(){
     <div style="margin-top:28px;padding:14px 18px;background:white;border-radius:14px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:14px;box-shadow:0 2px 6px rgba(0,0,0,.05);">
       <img class="logo-ltp" style="width:48px;height:48px;flex-shrink:0;">
       <div>
-        <div style="font-size:13px;font-weight:800;color:#1e1b4b;">Liceo Técnico Profesional de Río Bueno</div>
-        <div style="font-size:12px;color:#6b7280;">Programa de Integración Escolar (PIE)</div>
-        <div style="font-size:12px;color:#4f46e5;font-weight:700;">Creador: Álvaro Barra Sáez</div>
+        <div style="font-size:16px;font-weight:800;color:#1e1b4b;">Liceo Técnico Profesional de Río Bueno</div>
+        <div style="font-size:16px;color:#6b7280;">Programa de Integración Escolar (PIE)</div>
+        <div style="font-size:16px;color:#4f46e5;font-weight:700;">Creador: Álvaro Barra Sáez</div>
       </div>
     </div>`;
 }
@@ -2029,13 +2029,13 @@ function htmlDictado(d){
   return`<div class="card">
     <div class="card-title">✏️ Dictado — escucha y escribe aquí</div>
     ${panelVoz()}
-    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">
       🔊 Aprieta el botón para escuchar, luego escribe y aprieta <strong>Verificar</strong>.
     </p>
     <div class="dict-progreso">${dots}</div>
     ${pw}
     <div class="card-title" style="margin-top:20px">🗣 Dictado de frases</div>
-    <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Escucha la frase completa y escríbela tal como la escuchaste.</p>
+    <p style="font-size:16px;color:#9ca3af;margin-bottom:12px">Escucha la frase completa y escríbela tal como la escuchaste.</p>
     ${fw}
     <div class="dict-resumen" id="dict-resumen">
       <h3></h3>
@@ -2076,7 +2076,7 @@ function htmlEjercicio(d,idx){
     ${panelVoz()}
     <div class="progreso-bar-wrap"><div class="progreso-bar" style="width:${prog}%"></div></div>
     <p style="font-size:16px;font-weight:700;margin-bottom:10px">Forma la palabra: <span style="color:#4f46e5;font-size:22px">${ej.palabra.toUpperCase()}</span></p>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:12px">Toca las sílabas en el orden correcto.</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:12px">Toca las sílabas en el orden correcto.</p>
     <div id="zona_pal" style="min-height:44px;border:2px dashed #c7d2fe;border-radius:12px;padding:8px 12px;margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <span style="color:#9ca3af;font-size:14px">Aquí aparecen las sílabas...</span>
     </div>
@@ -2120,7 +2120,7 @@ function htmlLoteria(d){
   return`<div class="card">
     <div class="card-title">🎲 Juego de Sílabas</div>
     ${panelVoz()}
-    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">
       Sale una sílaba al azar. ¡Elige otra sílaba para formar una palabra!
     </p>
 
@@ -2170,7 +2170,7 @@ function lotSortear(){
   const palabras = BANCO_PALABRAS[elegida.s] || [];
 
   if(!palabras.length){
-    if(opcDiv){ opcDiv.style.display='block'; opcDiv.innerHTML='<p style="color:#9ca3af;font-size:13px">No hay palabras para esta sílaba aún.</p>'; }
+    if(opcDiv){ opcDiv.style.display='block'; opcDiv.innerHTML='<p style="color:#9ca3af;font-size:16px">No hay palabras para esta sílaba aún.</p>'; }
     return;
   }
 
@@ -2273,7 +2273,7 @@ function htmlPalabraDelDia(){
       <span class="pdial-imagen">${pd.imagen}</span>
       <div class="pdial-palabra">${pd.palabra}</div>
       <p class="pdial-contexto">"${pd.contexto}"</p>
-      <p style="font-size:13px;color:#6b7280;margin-bottom:8px">Toca cada sílaba para escucharla:</p>
+      <p style="font-size:16px;color:#6b7280;margin-bottom:8px">Toca cada sílaba para escucharla:</p>
       <div class="pdial-silabas">${silsHtml}</div>
     </div>
     <button class="btn-verificar" onclick="hablar('${pd.palabra}',velocidad)">🔊 Escuchar palabra completa</button>
@@ -2301,7 +2301,7 @@ function htmlDiscriminacion(d){
   return`<div class="card">
     <div class="card-title">🔍 Discriminación de Sílabas</div>
     ${panelVoz()}
-    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">Escucha y elige la sílaba correcta. ¡Demuestra lo que aprendiste!</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">Escucha y elige la sílaba correcta. ¡Demuestra lo que aprendiste!</p>
     <div id="disc-contenido">${renderPreguntaDisc()}</div>
     <div class="sec-logrado-wrap" style="margin-top:16px">
       <button class="btn-sec-logrado${log?' hecho':''}" onclick="confirmarLogrado('discriminar','¡Excelente! Discriminaste correctamente las sílabas.')">
@@ -2316,7 +2316,7 @@ function renderPreguntaDisc(){
   hablar(preg.correcta,velocidad);
   const dots=discPreguntas.map((_,i)=>`<div class="disc-prog-dot${i<discIdx?' ok':i===discIdx?' activo':''}">${i+1}</div>`).join('');
   const btns=preg.opciones.map(op=>`<button class="disc-btn" onclick="verificarDisc('${op}','${preg.correcta}')">${op}</button>`).join('');
-  return`<div><div class="disc-progreso">${dots}</div><div class="disc-pregunta">${preg.imagen} ¿Cuál sílaba escuchaste?<br><span style="font-size:12px;color:#9ca3af">Pista: inicia la palabra "${preg.palabra}"</span></div><div class="disc-opciones">${btns}</div><div class="disc-resultado" id="disc-res"></div></div>`;
+  return`<div><div class="disc-progreso">${dots}</div><div class="disc-pregunta">${preg.imagen} ¿Cuál sílaba escuchaste?<br><span style="font-size:16px;color:#9ca3af">Pista: inicia la palabra "${preg.palabra}"</span></div><div class="disc-opciones">${btns}</div><div class="disc-resultado" id="disc-res"></div></div>`;
 }
 function verificarDisc(elegida,correcta){
   document.querySelectorAll('.disc-btn').forEach(b=>b.disabled=true);
@@ -2346,7 +2346,7 @@ function htmlArmarPalabra(d){
   return`<div class="card">
     <div class="card-title">✏️ Armar Palabras</div>
     ${panelVoz()}
-    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">Escucha la palabra y selecciona las sílabas en orden correcto.</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">Escucha la palabra y selecciona las sílabas en orden correcto.</p>
     <div id="armar-contenido">${renderArmarEj(d,0)}</div>
     <div class="sec-logrado-wrap" style="margin-top:14px">
       <button class="btn-sec-logrado${log?' hecho':''}" onclick="confirmarLogrado('armar','¡Fantástico! Armaste todas las palabras.')">
@@ -2364,7 +2364,7 @@ function renderArmarEj(d,idx){
   hablar(ej.palabra,velocidad);
   return`<div>
     <div class="progreso-bar-wrap"><div class="progreso-bar" style="width:${prog}%"></div></div>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:6px">Ejercicio ${idx+1} de ${d.ejercicios.length}</p>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:6px">Ejercicio ${idx+1} de ${d.ejercicios.length}</p>
     <p style="font-size:17px;font-weight:800;margin-bottom:4px">Forma la palabra: <span style="color:#4f46e5">${ej.palabra.toUpperCase()}</span></p>
     <p class="armar-pista">🔊 Escucha y toca las sílabas en orden</p>
     <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:14px">Toca las sílabas...</span></div>
@@ -2477,14 +2477,14 @@ setTimeout(aplicarLogos,100);
     <div id="pdoc-alumnas-lista"></div>
     <div class="pdoc-seccion" style="border-color:#c7d2fe;">
       <h3>➕ Agregar alumna</h3>
-      <p style="font-size:12px;color:#6b7280;margin-bottom:12px">Ingresa el nombre, RUT y el BIN ID de JSONbin (debes crear el bin primero).</p>
+      <p style="font-size:16px;color:#6b7280;margin-bottom:12px">Ingresa el nombre, RUT y el BIN ID de JSONbin (debes crear el bin primero).</p>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;">
         <div><label class="pdoc-inp-label">Nombre</label><input class="pdoc-inp" id="nueva-nombre" type="text" placeholder="Valentina"></div>
         <div><label class="pdoc-inp-label">RUT</label><input class="pdoc-inp" id="nueva-rut" type="text" placeholder="12345678-9"></div>
         <div><label class="pdoc-inp-label">BIN ID de JSONbin</label><input class="pdoc-inp" id="nueva-bin" type="text" placeholder="69c1f..."></div>
         <button class="docente-btn-verde" onclick="agregarAlumna()" style="height:42px">Agregar</button>
       </div>
-      <div style="font-size:12px;color:#ef4444;margin-top:6px;" id="nueva-error"></div>
+      <div style="font-size:16px;color:#ef4444;margin-top:6px;" id="nueva-error"></div>
     </div>
   </div>
 </div>
