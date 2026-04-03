@@ -1122,8 +1122,8 @@ function hablar(txt, r){
 
 // ── Sección Asociar ────────────────────────────────────────
 let _asocPalabras = [];
-let _asocIzqSel = null;  // índice seleccionado en izquierda
-let _asocEmparejadas = new Set(); // palabras ya completadas
+let _asocIzqSel = null;
+let _asocEmparejadas = new Set();
 
 function obtenerPalabrasAsociar(d){
   const candidatas = [];
@@ -1150,29 +1150,26 @@ function renderAsociar(){
     return;
   }
 
-  // Mezclar izquierda y derecha de forma INDEPENDIENTE
   const izq = [..._asocPalabras].sort(()=>Math.random()-.5);
-  const der = [..._asocPalabras].sort(()=>Math.random()-.5);
-  // Asegurar que izq y der no estén en el mismo orden
-  while(izq.every((p,i)=>p.palabra===der[i].palabra)){
-    der.sort(()=>Math.random()-.5);
+  let der = [..._asocPalabras].sort(()=>Math.random()-.5);
+  let intentos = 0;
+  while(izq.every((p,i)=>p.palabra===der[i].palabra) && intentos++<20){
+    der = [..._asocPalabras].sort(()=>Math.random()-.5);
   }
 
-  window._asocIzqOrden = izq;
-  window._asocDerOrden = der;
+  window._asocIzqArr = izq;
+  window._asocDerArr = der;
 
   const log = getSecLogradas().includes('asociar');
 
   const izqHtml = izq.map((p,i)=>
-    `<button class="asoc-sil" id="asoc-izq-${i}"
-      onclick="asocTocarIzq(${i},'${p.silabas[0]}','${p.palabra}')">
+    `<button class="asoc-sil" id="asoc-izq-${i}" onclick="asocTocarIzq(${i})">
       ${p.silabas[0]}
     </button>`
   ).join('');
 
   const derHtml = der.map((p,i)=>
-    `<button class="asoc-sil" id="asoc-der-${i}"
-      onclick="asocTocarDer(${i},'${p.silabas[1]}','${p.palabra}')">
+    `<button class="asoc-sil" id="asoc-der-${i}" onclick="asocTocarDer(${i})">
       ${p.silabas[1]}
     </button>`
   ).join('');
@@ -1211,65 +1208,61 @@ function renderAsociar(){
     </div>
   </div>`;
 
-  // Leer instrucción al inicio
-  setTimeout(()=>hablar('Asocia las sílabas para formar palabras. Toca izquierda, luego derecha.', velocidad), 300);
+  setTimeout(()=>hablar('Asocia las sílabas para formar palabras. Toca izquierda, luego derecha.', velocidad), 400);
 }
 
 function asocLeerPalabras(){
-  // Leer todas las palabras en secuencia
   const palabras = _asocPalabras.map(p=>p.palabra).join(', ');
   hablar('Las palabras son: ' + palabras, velocidad);
 }
 
-function asocTocarIzq(idx, sil, palabra){
-  // Si ya está emparejada, no hacer nada
+function asocTocarIzq(idx){
+  const izqArr = window._asocIzqArr;
+  if(!izqArr) return;
   const el = document.getElementById('asoc-izq-'+idx);
   if(!el || el.classList.contains('correcta')) return;
 
-  // Deseleccionar anterior
-  document.querySelectorAll('.asoc-col:first-child .asoc-sil').forEach(b=>{
-    if(!b.classList.contains('correcta')) b.classList.remove('seleccionada');
-  });
+  for(let i=0;i<izqArr.length;i++){
+    const b=document.getElementById('asoc-izq-'+i);
+    if(b && !b.classList.contains('correcta')) b.classList.remove('seleccionada');
+  }
 
-  // Seleccionar esta
   el.classList.add('seleccionada');
-  _asocIzqSel = {idx, sil, palabra};
+  _asocIzqSel = idx;
+  hablar(izqArr[idx].silabas[0], velocidad);
 
-  // Voz dice la sílaba
-  hablar(sil, velocidad);
-
-  // Limpiar resultado
   const res = document.getElementById('asoc-resultado');
   if(res) res.style.display='none';
 }
 
-function asocTocarDer(idx, sil, palabra){
+function asocTocarDer(idx){
+  const izqArr = window._asocIzqArr;
+  const derArr = window._asocDerArr;
+  if(!izqArr||!derArr) return;
+
   const el = document.getElementById('asoc-der-'+idx);
   if(!el || el.classList.contains('correcta')) return;
 
-  // Voz dice la sílaba
-  hablar(sil, velocidad);
+  hablar(derArr[idx].silabas[1], velocidad);
 
-  if(!_asocIzqSel){
+  if(_asocIzqSel === null){
     mostrarBurbuja('👈 Primero toca una sílaba de la izquierda');
     return;
   }
 
   const res = document.getElementById('asoc-resultado');
+  const silIzq = izqArr[_asocIzqSel].silabas[0];
+  const silDer = derArr[idx].silabas[1];
 
-  // Verificar: ¿las dos sílabas forman una palabra válida?
-  const silIzq = _asocIzqSel.sil;
-  const silDer = sil;
   const palabraFormada = _asocPalabras.find(p=>
-    p.silabas[0].toLowerCase()===silIzq.toLowerCase() &&
-    p.silabas[1].toLowerCase()===silDer.toLowerCase()
+    p.silabas[0] === silIzq && p.silabas[1] === silDer
   );
 
   if(palabraFormada){
-    // ✅ Correcto
+    sonidoBien();
     el.classList.add('correcta');
-    document.getElementById('asoc-izq-'+_asocIzqSel.idx).classList.remove('seleccionada');
-    document.getElementById('asoc-izq-'+_asocIzqSel.idx).classList.add('correcta');
+    const elIzq = document.getElementById('asoc-izq-'+_asocIzqSel);
+    if(elIzq){ elIzq.classList.remove('seleccionada'); elIzq.classList.add('correcta'); }
     _asocEmparejadas.add(palabraFormada.palabra);
     puntos+=4; guardar();
     const pts=document.getElementById('pts');
@@ -1277,16 +1270,13 @@ function asocTocarDer(idx, sil, palabra){
 
     if(res){
       res.style.display='block';
-      res.className='';
-      res.style.background='#d1fae5';
-      res.style.color='#065f46';
+      res.style.background='#d1fae5'; res.style.color='#065f46';
       res.innerHTML='✅ ¡Correcto! <strong style="font-size:28px;letter-spacing:2px">'
         +silIzq+' + '+silDer+' = '+palabraFormada.palabra.toUpperCase()+'</strong> +4⭐';
     }
-    sonidoBien();hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
+    hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
     _asocIzqSel = null;
 
-    // ¿Completó todas?
     if(_asocEmparejadas.size===_asocPalabras.length){
       setTimeout(()=>{
         mostrarBurbuja('🏆 ¡Completaste todas las palabras!');
@@ -1294,18 +1284,15 @@ function asocTocarDer(idx, sil, palabra){
       }, 1500);
     }
   } else {
-    // ❌ Incorrecto
+    sonidoMal();
     el.style.animation='sacudir .4s';
     setTimeout(()=>el.style.animation='', 400);
     if(res){
       res.style.display='block';
-      res.className='';
-      res.style.background='#fee2e2';
-      res.style.color='#991b1b';
-      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta de nuevo!';
+      res.style.background='#fee2e2'; res.style.color='#991b1b';
+      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta con otra!';
     }
-    sonidoMal();sonidoMal();hablar('Intenta de nuevo', velocidad);
-    // Mantener selección izquierda para reintentar con otra derecha
+    hablar('Intenta de nuevo', velocidad);
   }
 }
 
