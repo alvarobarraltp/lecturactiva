@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Audio</title>
+<style>
+  body{font-family:Arial,sans-serif;padding:20px;background:#f0f4ff;text-align:center;}
+  h2{color:#1e1b4b;margin-bottom:20px;}
+  button{display:block;width:100%;max-width:350px;margin:12px auto;padding:18px;border-radius:14px;border:none;font-size:18px;font-weight:800;cursor:pointer;}
+  .btn-verde{background:#10b981;color:white;}
+  .btn-azul{background:#4f46e5;color:white;}
+  .btn-naranja{background:#f59e0b;color:white;}
+  #estado{background:white;border-radius:12px;padding:16px;margin:16px auto;max-width:350px;font-size:14px;color:#374151;border:2px solid #e5e7eb;}
+  #voces{text-align:left;font-size:12px;color:#6b7280;margin-top:10px;}
+</style>
+</head>
+<body>
+<h2>🔊 Diagnóstico de Audio</h2>
+<div id="estado">Toca un botón para probar...</div>
+
+<button class="btn-verde" onclick="test1()">✅ PRUEBA 1: Hablar simple</button>
+<button class="btn-azul" onclick="test2()">🔤 PRUEBA 2: Decir sílaba "ma"</button>
+<button class="btn-naranja" onclick="test3()">📢 PRUEBA 3: Texto largo</button>
+<button class="btn-verde" onclick="mostrarVoces()">📋 Ver voces disponibles</button>
+<div id="voces"></div>
+
+<script>
+function log(msg){
+  document.getElementById('estado').innerHTML += '<br>' + msg;
+}
+
+function test1(){
+  document.getElementById('estado').innerHTML = '⏳ Intentando...';
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance('Hola, prueba de audio');
+    u.lang = 'es-MX';
+    u.rate = 0.5;
+    u.volume = 1;
+    u.onstart = ()=>log('✅ Audio INICIADO');
+    u.onend = ()=>log('✅ Audio TERMINADO correctamente');
+    u.onerror = (e)=>log('❌ ERROR: ' + e.error);
+    window.speechSynthesis.speak(u);
+    log('speak() llamado...');
+  } catch(e){
+    log('❌ EXCEPCIÓN: ' + e.message);
+  }
+}
+
+function test2(){
+  document.getElementById('estado').innerHTML = '⏳ Diciendo "ma"...';
+  try {
+    window.speechSynthesis.cancel();
+    setTimeout(()=>{
+      const u = new SpeechSynthesisUtterance('ma');
+      u.lang = 'es-MX';
+      u.rate = 0.4;
+      u.volume = 1;
+      u.onstart = ()=>log('✅ "ma" INICIADO');
+      u.onend = ()=>log('✅ "ma" TERMINADO');
+      u.onerror = (e)=>log('❌ ERROR en "ma": ' + e.error);
+      window.speechSynthesis.speak(u);
+    }, 100);
+  } catch(e){
+    log('❌ EXCEPCIÓN: ' + e.message);
+  }
+}
+
+function test3(){
+  document.getElementById('estado').innerHTML = '⏳ Texto largo...';
+  try {
+    window.speechSynthesis.cancel();
+    setTimeout(()=>{
+      const u = new SpeechSynthesisUtterance('La vaca pasta en la sala. Mamá amasa la masa en casa.');
+      u.lang = 'es-CL';
+      u.rate = 0.5;
+      u.volume = 1;
+      u.onstart = ()=>log('✅ Texto largo INICIADO');
+      u.onend = ()=>log('✅ Texto largo TERMINADO');
+      u.onerror = (e)=>log('❌ ERROR texto largo: ' + e.error);
+      window.speechSynthesis.speak(u);
+    }, 100);
+  } catch(e){
+    log('❌ EXCEPCIÓN: ' + e.message);
+  }
+}
+
+function mostrarVoces(){
+  const voces = window.speechSynthesis.getVoices();
+  const div = document.getElementById('voces');
+  if(!voces.length){
+    div.innerHTML = '❌ No se encontraron voces. Reintentando...';
+    setTimeout(mostrarVoces, 1000);
+    return;
+  }
+  const esVoces = voces.filter(v=>v.lang.startsWith('es'));
+  div.innerHTML = '<strong>Voces en español (' + esVoces.length + '):</strong><br>' +
+    esVoces.map(v=>'• '+v.name+' ('+v.lang+')').join('<br>') +
+    '<br><br><strong>Total voces: ' + voces.length + '</strong>';
+}
+
+window.speechSynthesis.onvoiceschanged = mostrarVoces;
+setTimeout(mostrarVoces, 500);
+</script>
+</body>
+</html>
