@@ -241,28 +241,28 @@ body{
 
 /* PANEL DOCENTE */
 .pdoc-screen{position:fixed;inset:0;background:#f8f9ff;z-index:9998;overflow-y:auto;padding:0 0 40px;}
-.pdoc-header{background:#1e1b4b;color:white;padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.pdoc-header h1{font-size:22px;font-weight:900;flex:1;}
+.pdoc-header{background:#1e1b4b;color:white;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.pdoc-header h1{font-size:18px;font-weight:900;flex:1;}
 .pdoc-salir-btn{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);color:white;padding:12px 20px;border-radius:14px;cursor:pointer;font-size:17px;font-weight:800;font-family:inherit;min-height:50px;}
-.pdoc-main{max-width:900px;margin:0 auto;padding:22px 18px;}
-.pdoc-stat .num{font-size:32px;font-weight:900;display:block;margin-bottom:4px;}
+.pdoc-main{max-width:900px;margin:0 auto;padding:12px 14px;}
+.pdoc-stat .num{font-size:24px;font-weight:900;display:block;margin-bottom:2px;}
 .pdoc-stat .lbl{font-size:15px;color:#374151;font-weight:700;text-transform:uppercase;}
-.alumna-card{background:white;border-radius:20px;padding:22px;margin-bottom:18px;border:3px solid #e0e7ff;}
+.alumna-card{background:white;border-radius:16px;padding:14px;margin-bottom:12px;border:2px solid #e0e7ff;}
 .alumna-card-info h3{font-size:20px;font-weight:900;color:#111827;margin-bottom:3px;}
 .alumna-card-info p{font-size:16px;color:#374151;}
 .alumna-acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
 .pdoc-obs-area{width:100%;padding:12px 16px;border:3px solid #6b7280;border-radius:14px;font-size:18px;font-family:inherit;resize:vertical;min-height:70px;outline:none;margin-top:8px;}
 .docente-overlay{position:fixed;inset:0;background:rgba(17,24,39,.85);z-index:9990;display:flex;align-items:center;justify-content:center;}
-.docente-box{background:white;border-radius:24px;padding:32px 28px;max-width:460px;width:92%;box-shadow:0 24px 64px rgba(0,0,0,.4);}
+.docente-box{background:white;border-radius:20px;padding:20px 22px;max-width:420px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4);}
 .docente-box h2{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px;}
 .docente-clave-inp{flex:1;padding:16px 18px;border:3px solid #6b7280;border-radius:14px;font-size:20px;font-weight:700;font-family:inherit;outline:none;letter-spacing:3px;}
 .docente-clave-inp:focus{border-color:#3730a3;}
 .docente-btn-entrar{background:#1e1b4b;color:white;border:none;padding:14px 24px;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;min-height:54px;}
-.docente-btn-rojo{background:#991b1b;color:white;border:none;padding:12px 18px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;}
-.docente-btn-gris{background:#374151;color:white;border:none;padding:12px 18px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;}
+.docente-btn-rojo{background:#991b1b;color:white;border:none;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+.docente-btn-gris{background:#374151;color:white;border:none;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
 .docente-btn-verde{background:#065f46;color:white;border:none;padding:12px 18px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;}
 .docente-error-msg{font-size:17px;color:#991b1b;font-weight:800;margin-bottom:14px;min-height:22px;}
-.docente-seccion{margin-bottom:20px;padding:18px;background:#f8f9ff;border-radius:16px;border:2px solid #e0e7ff;}
+.docente-seccion{margin-bottom:12px;padding:12px;background:#f8f9ff;border-radius:12px;border:1.5px solid #e0e7ff;}
 .docente-seccion h3{font-size:18px;font-weight:800;color:#111827;margin-bottom:12px;}
 .docente-fila .etiq{font-size:17px;color:#374151;font-weight:700;}
 .docente-fila .val{font-size:17px;color:#1e1b4b;font-weight:900;}
@@ -1085,13 +1085,27 @@ function desbloquearVoz(){
   if(av) av.style.display = 'none';
 }
 
+// Mapa de correcciones fonéticas para sílabas que TTS interpreta mal
+const CORRECCIONES_FONETICAS = {
+  'na': 'nna', 'no': 'nno', 'nu': 'nnu', 'ni': 'nni',
+  'la': 'lla', 'lo': 'llo', 'le': 'lle', 'li': 'lli', 'lu': 'llu',
+  'ma': 'mma', 'me': 'mme', 'mi': 'mmi', 'mo': 'mmo', 'mu': 'mmu',
+  'pa': 'ppa', 'pe': 'ppe', 'pi': 'ppi', 'po': 'ppo', 'pu': 'ppu',
+  're': 'rre', 'ro': 'rro', 'ru': 'rru', 'ra': 'rra', 'ri': 'rri',
+  'sa': 'ssa', 'se': 'sse', 'si': 'ssi', 'so': 'sso', 'su': 'ssu',
+  'ta': 'tta', 'te': 'tte', 'ti': 'tti', 'to': 'tto', 'tu': 'ttu',
+};
+
 function hablar(txt, r){
   if(!txt || !txt.trim()) return;
   if(!window.speechSynthesis) return;
+  // Corregir sílabas que el TTS interpreta mal
+  const txtn = txt.trim().toLowerCase();
+  const corregido = CORRECCIONES_FONETICAS[txtn] || txt;
 
   try { window.speechSynthesis.cancel(); } catch(e){}
 
-  const u = new SpeechSynthesisUtterance(txt);
+  const u = new SpeechSynthesisUtterance(corregido);
   u.lang = 'es-MX';
   u.rate = Math.min(r || velocidad || 0.5, 0.55);
   u.volume = 1;
@@ -1122,8 +1136,8 @@ function hablar(txt, r){
 
 // ── Sección Asociar ────────────────────────────────────────
 let _asocPalabras = [];
-let _asocIzqSel = null;
-let _asocEmparejadas = new Set();
+let _asocIzqSel = null;  // índice seleccionado en izquierda
+let _asocEmparejadas = new Set(); // palabras ya completadas
 
 function obtenerPalabrasAsociar(d){
   const candidatas = [];
@@ -1150,26 +1164,29 @@ function renderAsociar(){
     return;
   }
 
+  // Mezclar izquierda y derecha de forma INDEPENDIENTE
   const izq = [..._asocPalabras].sort(()=>Math.random()-.5);
-  let der = [..._asocPalabras].sort(()=>Math.random()-.5);
-  let intentos = 0;
-  while(izq.every((p,i)=>p.palabra===der[i].palabra) && intentos++<20){
-    der = [..._asocPalabras].sort(()=>Math.random()-.5);
+  const der = [..._asocPalabras].sort(()=>Math.random()-.5);
+  // Asegurar que izq y der no estén en el mismo orden
+  while(izq.every((p,i)=>p.palabra===der[i].palabra)){
+    der.sort(()=>Math.random()-.5);
   }
 
-  window._asocIzqArr = izq;
-  window._asocDerArr = der;
+  window._asocIzqOrden = izq;
+  window._asocDerOrden = der;
 
   const log = getSecLogradas().includes('asociar');
 
   const izqHtml = izq.map((p,i)=>
-    `<button class="asoc-sil" id="asoc-izq-${i}" onclick="asocTocarIzq(${i})">
+    `<button class="asoc-sil" id="asoc-izq-${i}"
+      onclick="asocTocarIzq(${i},'${p.silabas[0]}','${p.palabra}')">
       ${p.silabas[0]}
     </button>`
   ).join('');
 
   const derHtml = der.map((p,i)=>
-    `<button class="asoc-sil" id="asoc-der-${i}" onclick="asocTocarDer(${i})">
+    `<button class="asoc-sil" id="asoc-der-${i}"
+      onclick="asocTocarDer(${i},'${p.silabas[1]}','${p.palabra}')">
       ${p.silabas[1]}
     </button>`
   ).join('');
@@ -1208,61 +1225,65 @@ function renderAsociar(){
     </div>
   </div>`;
 
-  setTimeout(()=>hablar('Asocia las sílabas para formar palabras. Toca izquierda, luego derecha.', velocidad), 400);
+  // Leer instrucción al inicio
+  setTimeout(()=>hablar('Asocia las sílabas para formar palabras. Toca izquierda, luego derecha.', velocidad), 300);
 }
 
 function asocLeerPalabras(){
+  // Leer todas las palabras en secuencia
   const palabras = _asocPalabras.map(p=>p.palabra).join(', ');
   hablar('Las palabras son: ' + palabras, velocidad);
 }
 
-function asocTocarIzq(idx){
-  const izqArr = window._asocIzqArr;
-  if(!izqArr) return;
+function asocTocarIzq(idx, sil, palabra){
+  // Si ya está emparejada, no hacer nada
   const el = document.getElementById('asoc-izq-'+idx);
   if(!el || el.classList.contains('correcta')) return;
 
-  for(let i=0;i<izqArr.length;i++){
-    const b=document.getElementById('asoc-izq-'+i);
-    if(b && !b.classList.contains('correcta')) b.classList.remove('seleccionada');
-  }
+  // Deseleccionar anterior
+  document.querySelectorAll('.asoc-col:first-child .asoc-sil').forEach(b=>{
+    if(!b.classList.contains('correcta')) b.classList.remove('seleccionada');
+  });
 
+  // Seleccionar esta
   el.classList.add('seleccionada');
-  _asocIzqSel = idx;
-  hablar(izqArr[idx].silabas[0], velocidad);
+  _asocIzqSel = {idx, sil, palabra};
 
+  // Voz dice la sílaba
+  hablar(sil, velocidad);
+
+  // Limpiar resultado
   const res = document.getElementById('asoc-resultado');
   if(res) res.style.display='none';
 }
 
-function asocTocarDer(idx){
-  const izqArr = window._asocIzqArr;
-  const derArr = window._asocDerArr;
-  if(!izqArr||!derArr) return;
-
+function asocTocarDer(idx, sil, palabra){
   const el = document.getElementById('asoc-der-'+idx);
   if(!el || el.classList.contains('correcta')) return;
 
-  hablar(derArr[idx].silabas[1], velocidad);
+  // Voz dice la sílaba
+  hablar(sil, velocidad);
 
-  if(_asocIzqSel === null){
+  if(!_asocIzqSel){
     mostrarBurbuja('👈 Primero toca una sílaba de la izquierda');
     return;
   }
 
   const res = document.getElementById('asoc-resultado');
-  const silIzq = izqArr[_asocIzqSel].silabas[0];
-  const silDer = derArr[idx].silabas[1];
 
+  // Verificar: ¿las dos sílabas forman una palabra válida?
+  const silIzq = _asocIzqSel.sil;
+  const silDer = sil;
   const palabraFormada = _asocPalabras.find(p=>
-    p.silabas[0] === silIzq && p.silabas[1] === silDer
+    p.silabas[0].toLowerCase()===silIzq.toLowerCase() &&
+    p.silabas[1].toLowerCase()===silDer.toLowerCase()
   );
 
   if(palabraFormada){
-    sonidoBien();
+    // ✅ Correcto
     el.classList.add('correcta');
-    const elIzq = document.getElementById('asoc-izq-'+_asocIzqSel);
-    if(elIzq){ elIzq.classList.remove('seleccionada'); elIzq.classList.add('correcta'); }
+    document.getElementById('asoc-izq-'+_asocIzqSel.idx).classList.remove('seleccionada');
+    document.getElementById('asoc-izq-'+_asocIzqSel.idx).classList.add('correcta');
     _asocEmparejadas.add(palabraFormada.palabra);
     puntos+=4; guardar();
     const pts=document.getElementById('pts');
@@ -1270,13 +1291,16 @@ function asocTocarDer(idx){
 
     if(res){
       res.style.display='block';
-      res.style.background='#d1fae5'; res.style.color='#065f46';
+      res.className='';
+      res.style.background='#d1fae5';
+      res.style.color='#065f46';
       res.innerHTML='✅ ¡Correcto! <strong style="font-size:28px;letter-spacing:2px">'
         +silIzq+' + '+silDer+' = '+palabraFormada.palabra.toUpperCase()+'</strong> +4⭐';
     }
-    hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
+    sonidoBien();hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
     _asocIzqSel = null;
 
+    // ¿Completó todas?
     if(_asocEmparejadas.size===_asocPalabras.length){
       setTimeout(()=>{
         mostrarBurbuja('🏆 ¡Completaste todas las palabras!');
@@ -1284,15 +1308,18 @@ function asocTocarDer(idx){
       }, 1500);
     }
   } else {
-    sonidoMal();
+    // ❌ Incorrecto
     el.style.animation='sacudir .4s';
     setTimeout(()=>el.style.animation='', 400);
     if(res){
       res.style.display='block';
-      res.style.background='#fee2e2'; res.style.color='#991b1b';
-      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta con otra!';
+      res.className='';
+      res.style.background='#fee2e2';
+      res.style.color='#991b1b';
+      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta de nuevo!';
     }
-    hablar('Intenta de nuevo', velocidad);
+    sonidoMal();sonidoMal();hablar('Intenta de nuevo', velocidad);
+    // Mantener selección izquierda para reintentar con otra derecha
   }
 }
 
