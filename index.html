@@ -316,6 +316,23 @@ body{
 }
 
 /* MÓVIL */
+.asoc-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0;}
+.asoc-col{display:flex;flex-direction:column;gap:12px;}
+.asoc-col-titulo{font-size:18px;font-weight:900;color:#374151;text-align:center;padding:10px;background:#f0f4ff;border-radius:12px;margin-bottom:4px;}
+.asoc-sil{padding:18px 14px;border-radius:16px;border:4px solid #6b7280;background:white;cursor:pointer;font-size:26px;font-weight:900;color:#1e1b4b;text-align:center;transition:all .2s;min-height:70px;display:flex;align-items:center;justify-content:center;}
+.asoc-sil:hover{border-color:#3730a3;background:#e0e7ff;transform:scale(1.04);}
+.asoc-sil.seleccionada{border-color:#1e1b4b;background:#1e1b4b;color:white;transform:scale(1.06);}
+.asoc-sil.correcta{border-color:#065f46;background:#d1fae5;color:#065f46;cursor:default;}
+.asoc-sil.incorrecta{border-color:#991b1b;background:#fee2e2;color:#991b1b;}
+.asoc-linea{display:flex;align-items:center;justify-content:center;font-size:20px;color:#9ca3af;font-weight:800;}
+.asoc-resultado{text-align:center;padding:14px;border-radius:14px;font-size:20px;font-weight:800;margin-top:8px;display:none;}
+.asoc-resultado.ok{background:#d1fae5;color:#065f46;display:block;}
+.asoc-resultado.error{background:#fee2e2;color:#991b1b;display:block;}
+.asoc-palabra-formada{font-size:32px;font-weight:900;color:#1e1b4b;letter-spacing:3px;}
+.asoc-progreso{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.asoc-prog-dot{width:36px;height:36px;border-radius:50%;border:3px solid #6b7280;background:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#6b7280;}
+.asoc-prog-dot.ok{background:#065f46;border-color:#065f46;color:white;}
+.asoc-prog-dot.activo{border-color:#3730a3;color:#3730a3;background:#e0e7ff;}
 @media(max-width:600px){
   .silaba-grid{grid-template-columns:repeat(3,1fr);}
   .tab-btn{min-width:80px;padding:14px 4px;font-size:15px;}
@@ -1084,6 +1101,160 @@ window.speechSynthesis.onvoiceschanged = cargarVoces;
 setTimeout(cargarVoces, 400);
 setTimeout(cargarVoces, 1200);
 
+// ── Sección Asociar: conectar sílabas para formar palabras ──
+let asocPalabras=[], asocIdx=0, asocPuntos=0, asocDerechaSel=null, asocIzqSel=null;
+
+function obtenerPalabrasAsociar(d){
+  // Obtener 5 palabras de 2 sílabas del banco del día
+  const sils = d.silabas.map(s=>s.s);
+  const candidatas = [];
+  sils.forEach(sil=>{
+    const banco = BANCO_PALABRAS[sil]||[];
+    banco.forEach(p=>{
+      if(p.silabas.length===2 && !candidatas.find(c=>c.palabra===p.palabra)){
+        candidatas.push(p);
+      }
+    });
+  });
+  // Mezclar y tomar 5
+  return candidatas.sort(()=>Math.random()-.5).slice(0,5);
+}
+
+function renderAsociar(){
+  const sec = document.getElementById('sec-asociar');
+  if(!sec) return;
+  const d = DIAS[diaActual];
+  asocPalabras = obtenerPalabrasAsociar(d);
+  asocIdx=0; asocPuntos=0; asocDerechaSel=null; asocIzqSel=null;
+  if(!asocPalabras.length){
+    sec.innerHTML='<div class="card"><p style="font-size:18px;color:#6b7280">No hay palabras disponibles para este día.</p></div>';
+    return;
+  }
+  sec.innerHTML = renderJuegoAsociar();
+}
+
+function renderJuegoAsociar(){
+  const log = getSecLogradas().includes('asociar');
+  const palabras = asocPalabras;
+  if(!palabras.length) return '<div class="card"><p>Sin palabras.</p></div>';
+
+  // Columna izquierda: primeras sílabas (mezcladas)
+  const izq = [...palabras].sort(()=>Math.random()-.5).map((p,i)=>({sil:p.silabas[0], palabra:p.palabra, idx:i}));
+  // Columna derecha: segundas sílabas (mezcladas diferente)
+  const der = [...palabras].sort(()=>Math.random()-.5).map((p,i)=>({sil:p.silabas[1], palabra:p.palabra, idx:i}));
+
+  // Guardar en window para acceso global
+  window._asocIzq = izq;
+  window._asocDer = der;
+  window._asocEmparejadas = new Set();
+  window._asocDerechaSel = null;
+
+  const dotsHtml = palabras.map((_,i)=>`<div class="asoc-prog-dot" id="asoc-dot-${i}">${i+1}</div>`).join('');
+  const izqHtml = izq.map((item,i)=>`<div class="asoc-sil" id="asoc-izq-${i}" onclick="asocTocarIzq(${i},'${item.palabra}')">${item.sil}</div>`).join('');
+  const derHtml = der.map((item,i)=>`<div class="asoc-sil" id="asoc-der-${i}" onclick="asocTocarDer(${i},'${item.palabra}')">${item.sil}</div>`).join('');
+
+  return`<div class="card">
+    <div class="card-title">🔗 Asocia las sílabas para formar palabras</div>
+    <p style="font-size:18px;color:#374151;margin-bottom:16px;font-weight:700;">
+      1️⃣ Toca una sílaba de la <strong>derecha</strong><br>
+      2️⃣ Luego toca la sílaba de la <strong>izquierda</strong> que la completa
+    </p>
+    <div class="asoc-progreso">${dotsHtml}</div>
+    <div id="asoc-resultado" class="asoc-resultado"></div>
+    <div class="asoc-wrap">
+      <div class="asoc-col">
+        <div class="asoc-col-titulo">← Izquierda</div>
+        ${izqHtml}
+      </div>
+      <div class="asoc-col">
+        <div class="asoc-col-titulo">Derecha →</div>
+        ${derHtml}
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn-verificar" onclick="renderAsociar()">🔄 Nuevo juego</button>
+    </div>
+    <div class="sec-logrado-wrap" style="margin-top:16px">
+      <button class="btn-sec-logrado${log?' hecho':''}" onclick="confirmarLogrado('asociar','¡Excelente! Asociaste las sílabas correctamente.')">
+        ${log?'✅ ¡Logrado!':'🏅 ¡Logré asociar!'}
+      </button>
+    </div>
+  </div>`;
+}
+
+function asocTocarDer(idx, palabra){
+  const el = document.getElementById('asoc-der-'+idx);
+  if(!el || el.classList.contains('correcta')) return;
+  // Deseleccionar anterior derecha
+  document.querySelectorAll('.asoc-col:last-child .asoc-sil').forEach(b=>{
+    if(!b.classList.contains('correcta')) b.classList.remove('seleccionada');
+  });
+  window._asocDerechaSel = {idx, palabra};
+  el.classList.add('seleccionada');
+  hablar(window._asocDer[idx].sil, velocidad);
+  // Limpiar resultado
+  const res = document.getElementById('asoc-resultado');
+  if(res){ res.style.display='none'; res.className='asoc-resultado'; }
+}
+
+function asocTocarIzq(idx, palabra){
+  const el = document.getElementById('asoc-izq-'+idx);
+  if(!el || el.classList.contains('correcta')) return;
+  if(!window._asocDerechaSel){
+    mostrarBurbuja('👉 Primero toca una sílaba de la derecha');
+    return;
+  }
+  hablar(window._asocIzq[idx].sil, velocidad);
+  const der = window._asocDerechaSel;
+  const res = document.getElementById('asoc-resultado');
+  // Verificar si forman una palabra válida
+  const silIzq = window._asocIzq[idx].sil;
+  const silDer = window._asocDer[der.idx].sil;
+  // Buscar si existe una palabra con estas dos sílabas
+  const palabraFormada = asocPalabras.find(p=>
+    p.silabas[0]===silIzq && p.silabas[1]===silDer
+  );
+
+  if(palabraFormada){
+    // ¡Correcto!
+    el.classList.add('correcta');
+    document.getElementById('asoc-der-'+der.idx).classList.remove('seleccionada');
+    document.getElementById('asoc-der-'+der.idx).classList.add('correcta');
+    asocPuntos++;
+    puntos+=4; guardar();
+    const pts=document.getElementById('pts');
+    if(pts) pts.textContent='⭐ '+puntos;
+    // Marcar progreso
+    const dot = document.getElementById('asoc-dot-'+(asocPuntos-1));
+    if(dot) dot.className='asoc-prog-dot ok';
+    if(res){
+      res.style.display='block';
+      res.className='asoc-resultado ok';
+      res.innerHTML='✅ ¡Correcto! <span class="asoc-palabra-formada">'+silIzq+silDer+' = '+palabraFormada.palabra.toUpperCase()+'</span> +4⭐';
+    }
+    felicitar('✅ ¡Muy bien!','¡Muy bien '+(nombreAlumna||'')+', la palabra es '+palabraFormada.palabra+'!');
+    window._asocDerechaSel=null;
+    // Si completó todas
+    if(asocPuntos===asocPalabras.length){
+      setTimeout(()=>{
+        mostrarBurbuja('🏆 ¡Completaste todas las palabras!');
+        hablar('¡Felicitaciones '+(nombreAlumna||'')+', completaste todas las palabras!',velocidad);
+      },1500);
+    }
+  } else {
+    // Incorrecto
+    el.classList.add('incorrecta');
+    setTimeout(()=>el.classList.remove('incorrecta'),800);
+    if(res){
+      res.style.display='block';
+      res.className='asoc-resultado error';
+      res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta de nuevo!';
+    }
+    hablar('Intenta de nuevo',velocidad);
+    // Mantener derecha seleccionada para reintentar
+  }
+}
+
 function renderReporte(){
   const sec = document.getElementById('sec-reporte');
   if(!sec) return;
@@ -1677,6 +1848,7 @@ function renderDia(){
       <button class="tab-btn" id="tab-btn-dictado" onclick="cambiarSec('dictado',this)"><div style="font-size:26px;margin-bottom:4px">📝</div>Dictado<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-discriminar" onclick="cambiarSec('discriminar',this)"><div style="font-size:26px;margin-bottom:4px">🔍</div>Discriminar<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-loteria" onclick="cambiarSec('loteria',this)"><div style="font-size:26px;margin-bottom:4px">🎲</div>Lotería<span class="tab-check"></span></button>
+      <button class="tab-btn" id="tab-btn-asociar" onclick="cambiarSec('asociar',this);renderAsociar()"><div style="font-size:26px;margin-bottom:4px">🔗</div>Asociar<span class="tab-check"></span></button>
       <button class="tab-btn" id="tab-btn-miprogreso" onclick="cambiarSec('miprogreso',this);renderMiProgreso()"><div style="font-size:26px;margin-bottom:4px">🏆</div>Mi Progreso</button>
       <button class="tab-btn" onclick="cambiarSec('reporte',this);renderReporte()"><div style="font-size:26px;margin-bottom:4px">📊</div>Reporte</button>
     </div>
@@ -1687,6 +1859,7 @@ function renderDia(){
     <div id="sec-dictado" class="seccion">${htmlDictado(d)}</div>
     <div id="sec-discriminar" class="seccion">${htmlDiscriminacion(d)}</div>
     <div id="sec-loteria" class="seccion">${htmlLoteria(d)}</div>
+    <div id="sec-asociar" class="seccion"></div>
     <div id="sec-miprogreso" class="seccion">${htmlMiProgreso()}</div>
     <div id="sec-reporte" class="seccion"></div>
 
@@ -1701,7 +1874,7 @@ function renderDia(){
 }
 
 // Orden obligatorio de secciones
-const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','discriminar','loteria'];
+const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','discriminar','loteria','asociar'];
 
 function getSecLogradas(){
   return JSON.parse(localStorage.getItem('sec_'+diaActual)||'[]');
@@ -2320,7 +2493,20 @@ function renderPreguntaDisc(){
   hablar(preg.correcta,velocidad);
   const dots=discPreguntas.map((_,i)=>`<div class="disc-prog-dot${i<discIdx?' ok':i===discIdx?' activo':''}">${i+1}</div>`).join('');
   const btns=preg.opciones.map(op=>`<button class="disc-btn" onclick="verificarDisc('${op}','${preg.correcta}')">${op}</button>`).join('');
-  return`<div><div class="disc-progreso">${dots}</div><div class="disc-pregunta">${preg.imagen} ¿Cuál sílaba escuchaste?<br><span style="font-size:16px;color:#9ca3af">Pista: inicia la palabra "${preg.palabra}"</span></div><div class="disc-opciones">${btns}</div><div class="disc-resultado" id="disc-res"></div></div>`;
+  return`<div>
+    <div class="disc-progreso">${dots}</div>
+    <div class="disc-pregunta">${preg.imagen} ¿Cuál sílaba escuchaste?<br>
+      <span style="font-size:16px;color:#6b7280;font-weight:700">Pista: inicia la palabra "${preg.palabra}"</span>
+    </div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <button onclick="hablar(discPreguntas[discIdx]?.correcta,velocidad)"
+        style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">
+        🔊 Escuchar de nuevo
+      </button>
+    </div>
+    <div class="disc-opciones">${btns}</div>
+    <div class="disc-resultado" id="disc-res"></div>
+  </div>`;
 }
 function verificarDisc(elegida,correcta){
   document.querySelectorAll('.disc-btn').forEach(b=>b.disabled=true);
