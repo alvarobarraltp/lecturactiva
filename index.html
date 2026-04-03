@@ -993,6 +993,47 @@ let vozActual = 'paulina'; // 'paulina' | 'nino'
 let vozPaulina = null;
 let vozNino   = null;
 
+
+// ── Sonidos de retroalimentación ────────────────────────────
+function sonidoBien(){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const tiempos = [[523,0],[659,0.15],[784,0.3]]; // Do-Mi-Sol
+    tiempos.forEach(([freq, t])=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime+t);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime+t+0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+0.35);
+      osc.start(ctx.currentTime+t);
+      osc.stop(ctx.currentTime+t+0.35);
+    });
+  } catch(e){}
+}
+
+function sonidoMal(){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const tiempos = [[350,0],[280,0.2]]; // tono grave descendente
+    tiempos.forEach(([freq, t])=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime+t);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime+t+0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+0.4);
+      osc.start(ctx.currentTime+t);
+      osc.stop(ctx.currentTime+t+0.4);
+    });
+  } catch(e){}
+}
+
+
 function cargarVoces(){
   const todas = window.speechSynthesis.getVoices();
   if(!todas.length){ setTimeout(cargarVoces, 300); return; }
@@ -1242,7 +1283,7 @@ function asocTocarDer(idx, sil, palabra){
       res.innerHTML='✅ ¡Correcto! <strong style="font-size:28px;letter-spacing:2px">'
         +silIzq+' + '+silDer+' = '+palabraFormada.palabra.toUpperCase()+'</strong> +4⭐';
     }
-    hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
+    sonidoBien();hablar('¡Muy bien! La palabra es '+palabraFormada.palabra, velocidad);
     _asocIzqSel = null;
 
     // ¿Completó todas?
@@ -1263,7 +1304,7 @@ function asocTocarDer(idx, sil, palabra){
       res.style.color='#991b1b';
       res.innerHTML='❌ Esas sílabas no forman una palabra. ¡Intenta de nuevo!';
     }
-    hablar('Intenta de nuevo', velocidad);
+    sonidoMal();sonidoMal();hablar('Intenta de nuevo', velocidad);
     // Mantener selección izquierda para reintentar con otra derecha
   }
 }
@@ -2120,6 +2161,7 @@ function seccionCompletada(sec){
 }
 
 function confirmarLogrado(sec, msgVoz){
+  sonidoBien();
   // Validar que la sección esté realmente completada
   if(!seccionCompletada(sec)) return;
   const nom = nombreAlumna || '';
@@ -2167,7 +2209,7 @@ function verificarPalabra(idx, correcta){
   if(escrito === correcto){
     inp.className='dict-input ok';
     item.className='dict-item correcta';
-    res.className='dict-resultado ok';
+    sonidoBien();res.className='dict-resultado ok';
     res.textContent='✅ ¡Muy bien! Está correcto.';
     if(dot){dot.className='dict-prog-dot ok';dot.textContent='✓';}
     puntos+=2;
@@ -2201,7 +2243,7 @@ function verificarFrase(idx, correcta){
   if(escrito === correcto){
     inp.className='frase-input ok';
     item.className='frase-item correcta';
-    res.className='dict-resultado ok';
+    sonidoBien();res.className='dict-resultado ok';
     res.textContent='✅ ¡Perfecto! Frase correcta.';
     puntos+=3; guardar();
     const pts=document.getElementById('pts');
@@ -2359,7 +2401,7 @@ function verificarFraseEscritura(i, frase){
   const ok = resp === correct;
   res.style.display='block';
   if(ok){
-    res.className='dict-resultado ok';
+    sonidoBien();res.className='dict-resultado ok';
     res.textContent='✅ ¡Correcto! Muy bien'+( nombreAlumna?', '+nombreAlumna:'')+'.';
     inp.className='dict-input ok';
     if(item) item.style.borderColor='#065f46';
@@ -2560,7 +2602,7 @@ function lotVerificar(elegida, correcta, palabra, silBase){
       resDiv.className='lot-resultado ok';
       resDiv.textContent='✅ ¡Correcto! La palabra es: '+palabra+' +3⭐';
     }
-    felicitar('✅ ¡Correcto! La palabra es: '+palabra, '¡Muy bien! La palabra es '+palabra);
+    sonidoBien();felicitar('✅ ¡Correcto! La palabra es: '+palabra, '¡Muy bien! La palabra es '+palabra);
   } else {
     if(resDiv){
       resDiv.style.display='block';
@@ -2674,14 +2716,14 @@ function verificarDisc(elegida,correcta){
   const ok=elegida===correcta;
   regSil(correcta,'intento',ok);
   if(ok){
-    discPuntos++;puntos+=2;guardar();
+    sonidoBien();discPuntos++;puntos+=2;guardar();
     const pts=document.getElementById('pts');if(pts)pts.textContent='⭐ '+puntos;
     document.querySelectorAll('.disc-btn').forEach(b=>{if(b.textContent.trim()===correcta)b.classList.add('ok');});
     if(resEl){resEl.className='disc-resultado ok';resEl.textContent='✅ ¡Correcto! +2⭐';}
-    felicitar('✅ ¡Correcto! La sílaba es '+correcta,'¡Muy bien! La sílaba es '+correcta,false);
+    sonidoBien();felicitar('✅ ¡Correcto! La sílaba es '+correcta,'¡Muy bien! La sílaba es '+correcta,false);
   } else {
     document.querySelectorAll('.disc-btn').forEach(b=>{if(b.textContent.trim()===correcta)b.classList.add('ok');else if(b.textContent.trim()===elegida)b.classList.add('error');});
-    if(resEl){resEl.className='disc-resultado error';resEl.textContent='❌ Era: '+correcta+'. ¡Sigue intentando!';}
+    if(resEl){sonidoMal();resEl.className='disc-resultado error';resEl.textContent='❌ Era: '+correcta+'. ¡Sigue intentando!';}
     hablar('La sílaba es '+correcta,velocidad);
   }
   discIdx++;
@@ -2751,7 +2793,7 @@ function verificarArmar(palabra,silStr,idx){
   const ok=armarFormada.join('').toLowerCase()===palabra.toLowerCase()||armarFormada.join('')===correctas.join('');
   correctas.forEach(s=>regSil(s,'intento',ok));
   if(ok){
-    if(fb){fb.className='feedback ok';fb.textContent='¡Muy bien! ⭐ La palabra es: '+palabra;}
+    sonidoBien();if(fb){fb.className='feedback ok';fb.textContent='¡Muy bien! ⭐ La palabra es: '+palabra;}
     puntos+=5;guardar();const pts=document.getElementById('pts');if(pts)pts.textContent='⭐ '+puntos;
     armarIdx++;setTimeout(()=>{const c=document.getElementById('armar-contenido');if(c)c.innerHTML=renderArmarEj(null,armarIdx);},1600);
   } else {
