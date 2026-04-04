@@ -2136,9 +2136,12 @@ function htmlSilabas(d){
 function playSil(sil,idx){
   document.querySelectorAll('.sil').forEach(el=>el.classList.remove('playing'));
   const el=document.getElementById('sil_'+idx);
-  if(el)el.classList.add('playing');
+  if(el){ el.classList.add('playing'); el.dataset.tocada='1'; }
   regSil(sil,'vista',true);
   hablar(sil,velocidad);
+  // Registrar sílabas tocadas para validación
+  const tocadas = document.querySelectorAll('.sil[data-tocada]').length;
+  sessionStorage.setItem('sil_dia_'+diaActual, tocadas);
   setTimeout(()=>{if(el)el.classList.remove('playing');},2200);
 }
 
@@ -2152,7 +2155,7 @@ function htmlLectura(d){
   const lineas=d.textoLectura.txt.split('\n');
   const pHtml=lineas.map(l=>l.split(' ').map(p=>{
     const limpia=p.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ]/g,'');
-    return`<span class="palabra-lectura" onclick="hablar('${limpia}',velocidad)">${p}</span>`;
+    return`<span class="palabra-lectura" onclick="hablar('${limpia}',velocidad);sessionStorage.setItem('lec_tocadas_'+diaActual,parseInt(sessionStorage.getItem('lec_tocadas_'+diaActual)||'0')+1)">${p}</span>`;
   }).join(' ')).join('<br>');
   const lecLograda = localStorage.getItem('lec_'+diaActual) === '1';
   return`<div class="card">
@@ -2173,64 +2176,97 @@ function htmlLectura(d){
 
 function seccionCompletada(sec){
   const d = DIAS[diaActual];
+  function msg(burbuja, voz){ mostrarBurbuja(burbuja); hablar(voz, velocidad); return false; }
+
   switch(sec){
-    case 'armar':
-      // Debe haber completado todos los ejercicios
-      if(armarIdx < d.ejercicios.length){
-        mostrarBurbuja('⚠️ Completa todos los ejercicios primero (' + armarIdx + '/' + d.ejercicios.length + ')');
-        hablar('Debes completar todos los ejercicios', velocidad);
-        return false;
-      }
-      return true;
-    case 'dictado':
-      // Solo 8 palabras se muestran en htmlDictado (slice 0,8)
-      const totalDict = Math.min(d.palabrasDictado ? d.palabrasDictado.length : 0, 8);
-      const dictItems = document.querySelectorAll('.dict-item.correcta, .dict-item.incorrecta');
-      if(dictItems.length < totalDict){
-        mostrarBurbuja('⚠️ Completa todo el dictado primero (' + dictItems.length + '/' + totalDict + ')');
-        hablar('Debes completar el dictado completo', velocidad);
-        return false;
-      }
-      return true;
-    case 'discriminar':
-      // Debe haber completado todas las preguntas
-      if(discIdx < discPreguntas.length){
-        mostrarBurbuja('⚠️ Completa todas las preguntas (' + discIdx + '/' + discPreguntas.length + ')');
-        hablar('Debes responder todas las preguntas', velocidad);
-        return false;
-      }
-      return true;
-    case 'loteria':
-      // Debe haber jugado al menos 3 rondas
-      if(lotPuntosRonda < 3){
-        mostrarBurbuja('⚠️ Juega al menos 3 rondas primero (' + lotPuntosRonda + '/3)');
-        hablar('Juega al menos tres rondas', velocidad);
-        return false;
-      }
-      return true;
-    case 'asociar':
-      // Debe haber completado al menos 3 pares
-      const asocOk = document.querySelectorAll('.asoc-sil.correcta').length;
-      const asocTotal = window._asocDer ? window._asocDer.length : 5;
-      if(asocOk < Math.min(3, asocTotal)){
-        mostrarBurbuja('⚠️ Completa más asociaciones (' + asocOk + '/' + asocTotal + ')');
-        hablar('Debes completar más asociaciones', velocidad);
-        return false;
-      }
-      return true;
+
     case 'silabas':
-      return true; // sílabas siempre se puede lograr
-    case 'escritura':
-      // Debe haber verificado al menos 1 frase
-      const escritOk = document.querySelectorAll('.dict-resultado.ok').length;
-      if(escritOk < 1){
-        mostrarBurbuja('⚠️ Escucha y escribe al menos una frase');
-        hablar('Escucha y escribe al menos una frase',velocidad);
-        return false;
+      // Debe haber tocado al menos la mitad de las sílabas
+      const silTocadas = document.querySelectorAll('.sil.playing, .sil[data-tocada]').length
+        || parseInt(sessionStorage.getItem('sil_dia_'+diaActual)||'0');
+      const silTotal = d.silabas ? d.silabas.length : 1;
+      if(silTocadas < Math.ceil(silTotal/2)){
+        return msg('⚠️ Toca al menos la mitad de las sílabas ('+silTocadas+'/'+silTotal+')',
+          'Debes tocar más sílabas');
       }
       return true;
+
+    case 'palabradia':
+      // Debe haber escuchado la palabra del día
+      const pdTocada = sessionStorage.getItem('pd_tocada_'+diaActual);
+      if(!pdTocada){
+        return msg('⚠️ Toca las sílabas de la Palabra del Día primero',
+          'Primero escucha la palabra del día');
+      }
+      return true;
+
+    case 'lectura':
+      // Debe haber tocado al menos 3 palabras del texto
+      const lecTocadas = parseInt(sessionStorage.getItem('lec_tocadas_'+diaActual)||'0');
+      if(lecTocadas < 3){
+        return msg('⚠️ Lee el texto tocando las palabras primero ('+lecTocadas+' tocadas)',
+          'Toca las palabras del texto para escucharlas');
+      }
+      return true;
+
+    case 'armar':
+      // Todos los ejercicios completados
+      if(armarIdx < d.ejercicios.length){
+        return msg('⚠️ Completa todos los ejercicios ('+armarIdx+'/'+d.ejercicios.length+')',
+          'Debes completar todos los ejercicios');
+      }
+      return true;
+
+    case 'dictado':
+      // Todas las palabras respondidas (máx 8)
+      const totalDict = Math.min(d.palabrasDictado ? d.palabrasDictado.length : 0, 8);
+      const dictOk = document.querySelectorAll('.dict-item.correcta').length;
+      const dictErr = document.querySelectorAll('.dict-item.incorrecta').length;
+      if(dictOk + dictErr < totalDict){
+        return msg('⚠️ Responde todas las palabras ('+(dictOk+dictErr)+'/'+totalDict+')',
+          'Debes completar el dictado completo');
+      }
+      return true;
+
+    case 'escritura':
+      // Todas las frases respondidas
+      const totalEsc = d.frases ? d.frases.length : 0;
+      const escritOk = document.querySelectorAll('.dict-resultado.ok').length;
+      const escritErr = document.querySelectorAll('#sec-escritura .dict-resultado.error').length;
+      if(escritOk + escritErr < totalEsc){
+        return msg('⚠️ Responde todas las frases ('+(escritOk+escritErr)+'/'+totalEsc+')',
+          'Debes responder todas las frases');
+      }
+      return true;
+
+    case 'discriminar':
+      // Todas las preguntas respondidas
+      if(discIdx < discPreguntas.length){
+        return msg('⚠️ Responde todas las preguntas ('+discIdx+'/'+discPreguntas.length+')',
+          'Debes responder todas las preguntas');
+      }
+      return true;
+
+    case 'loteria':
+      // Al menos 3 rondas jugadas
+      if(lotPuntosRonda < 3){
+        return msg('⚠️ Juega al menos 3 rondas ('+lotPuntosRonda+'/3)',
+          'Juega al menos tres rondas');
+      }
+      return true;
+
+    case 'asociar':
+      // Al menos 3 pares correctos
+      const asocOk = document.querySelectorAll('.asoc-sil.correcta').length / 2;
+      const asocTotal = _asocPalabras ? _asocPalabras.length : 5;
+      if(asocOk < Math.min(3, asocTotal)){
+        return msg('⚠️ Completa al menos 3 asociaciones ('+asocOk+'/'+asocTotal+')',
+          'Debes completar más asociaciones');
+      }
+      return true;
+
     default:
-      return true; // lectura, palabradia: siempre permitir
+      return true;
   }
 }
 
@@ -2718,7 +2754,7 @@ function lotReset(){
 function htmlPalabraDelDia(){
   const pd=PALABRAS_DEL_DIA[diaActual];
   if(!pd) return '<div class="card"><p>Sin palabra del día.</p></div>';
-  const silsHtml=pd.silabas.map(s=>`<span class="pdial-sil" onclick="hablar('${s}',velocidad);regSil('${s}','vista',true)">${s}</span>`).join('<span style="color:#9ca3af;font-size:22px;margin:0 6px">+</span>');
+  const silsHtml=pd.silabas.map(s=>`<span class="pdial-sil" onclick="hablar('${s}',velocidad);regSil('${s}','vista',true);sessionStorage.setItem('pd_tocada_'+diaActual,'1')">${s}</span>`).join('<span style="color:#9ca3af;font-size:22px;margin:0 6px">+</span>');
   const log=getSecLogradas().includes('palabradia');
   return`<div class="card">
     <div class="card-title">⭐ Palabra del Día</div>
