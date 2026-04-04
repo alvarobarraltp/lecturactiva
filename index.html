@@ -1119,7 +1119,7 @@ const CORRECCIONES_FONETICAS = {
 
 // ── Sistema de audio MP3 + TTS de respaldo ──────────────────
 const _audioFaltante = new Set();
-const _audioBufferCache = {};
+let _audioActual = null;
 
 function _rutaAudio(txt){
   const t = txt.trim().toLowerCase();
@@ -1133,66 +1133,48 @@ function _rutaAudio(txt){
   else return 'audio/palabras/pal_'+s+'.mp3';
 }
 
-function _recortarSilencio(buffer){
-  const umbral = 0.01;
-  const data = buffer.getChannelData(0);
-  const sr = buffer.sampleRate;
-  let inicio = 0;
-  for(let i=0;i<data.length;i++){
-    if(Math.abs(data[i])>umbral){ inicio=Math.max(0,i-Math.floor(sr*0.03)); break; }
-  }
-  if(inicio===0) return buffer;
-  const nuevoLen = buffer.length - inicio;
-  const ctx2 = new (window.AudioContext||window.webkitAudioContext)();
-  const nuevo = ctx2.createBuffer(buffer.numberOfChannels, nuevoLen, sr);
-  for(let c=0;c<buffer.numberOfChannels;c++){
-    const vd=buffer.getChannelData(c), nd=nuevo.getChannelData(c);
-    for(let i=0;i<nuevoLen;i++) nd[i]=vd[inicio+i];
-  }
-  return nuevo;
-}
-
-function _reproducirBuffer(buffer){
-  try {
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    if(ctx.state==='suspended') ctx.resume();
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    src.connect(ctx.destination);
-    src.start(0);
-  } catch(e){ console.warn('buffer error:',e); }
-}
-
 function hablar(txt, r){
   if(!txt||!txt.trim()) return;
   const ruta = _rutaAudio(txt);
 
-  // Si sabemos que no existe el MP3, usar TTS directo
+  // Detener audio anterior
+  if(_audioActual){
+    try{ _audioActual.pause(); _audioActual.currentTime=0; }catch(e){}
+    _audioActual = null;
+  }
+
+  // Si ya sabemos que no existe, usar TTS
   if(_audioFaltante.has(ruta)){ _hablarTTS(txt,r); return; }
 
-  // Si ya está en caché, reproducir directo
-  if(_audioBufferCache[ruta]){ _reproducirBuffer(_audioBufferCache[ruta]); return; }
+  // Usar Audio() nativo — funciona en iOS sin restricciones de AudioContext
+  const audio = new Audio(ruta);
+  audio.preload = 'auto';
+  _audioActual = audio;
 
-  // Intentar cargar MP3
-  fetch(ruta)
-    .then(res=>{ if(!res.ok) throw new Error('404'); return res.arrayBuffer(); })
-    .then(ab=>{
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
-      return ctx.decodeAudioData(ab);
-    })
-    .then(buf=>{
-      const recortado = _recortarSilencio(buf);
-      _audioBufferCache[ruta] = recortado;
-      _reproducirBuffer(recortado);
-    })
-    .catch(()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); });
+  audio.addEventListener('canplaythrough', ()=>{
+    audio.play().catch(()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); });
+  }, {once:true});
+
+  audio.addEventListener('error', ()=>{
+    _audioFaltante.add(ruta); _hablarTTS(txt,r);
+  }, {once:true});
+
+  // Timeout: si no carga en 2s, usar TTS
+  const timeout = setTimeout(()=>{
+    if(audio.readyState < 3){
+      _audioFaltante.add(ruta); _hablarTTS(txt,r);
+    }
+  }, 2000);
+  audio.addEventListener('canplaythrough', ()=>clearTimeout(timeout), {once:true});
+
+  audio.load();
 }
 
 function _hablarTTS(txt, r){
   if(!window.speechSynthesis) return;
   const txtn = txt.trim().toLowerCase();
-  const corregido = CORRECCIONES_FONETICAS[txtn] || txt;
-  try { window.speechSynthesis.cancel(); } catch(e){}
+  const corregido = (typeof CORRECCIONES_FONETICAS !== 'undefined' && CORRECCIONES_FONETICAS[txtn]) || txt;
+  try{ window.speechSynthesis.cancel(); }catch(e){}
   const u = new SpeechSynthesisUtterance(corregido);
   u.lang='es-MX'; u.rate=Math.min(r||velocidad||0.5,0.55); u.volume=1;
   u.pitch = vozActual==='nino' ? 1.4 : 1.0;
