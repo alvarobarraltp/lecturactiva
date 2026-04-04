@@ -1121,15 +1121,30 @@ const CORRECCIONES_FONETICAS = {
 const _audioFaltante = new Set();
 let _audioActual = null;
 
+// Mapa de texto → nombre de archivo de audio
+const _AUDIO_MAPA = {"¡Muy bien! Practicaste todas las sílabas.": "msg_logro_silabas", "¡Muy bien! Trabajaste la palabra del día.": "msg_logro_palabradia", "¡Muy bien! Completaste la lectura.": "msg_logro_lectura", "¡Fantástico! Armaste todas las palabras.": "msg_logro_armar", "¡Excelente! Completaste el dictado.": "msg_logro_dictado", "¡Muy bien! Completaste la escritura de frases.": "msg_logro_escritura", "¡Excelente! Discriminaste correctamente las sílabas.": "msg_logro_discriminar", "¡Genial! Terminaste el juego de sílabas.": "msg_logro_loteria", "¡Excelente! Asociaste las sílabas correctamente.": "msg_logro_asociar", "¡Muy bien! Completaste todas las palabras.": "msg_completaste_palabras", "Ahora vamos a Sílabas": "msg_vamos_silabas", "Ahora vamos a Palabra del día": "msg_vamos_palabradia", "Ahora vamos a Lectura": "msg_vamos_lectura", "Ahora vamos a Armar palabras": "msg_vamos_armar", "Ahora vamos a Dictado": "msg_vamos_dictado", "Ahora vamos a Escritura": "msg_vamos_escritura", "Ahora vamos a Discriminación": "msg_vamos_discriminar", "Ahora vamos a Lotería": "msg_vamos_loteria", "Ahora vamos a Asociar": "msg_vamos_asociar", "¡Muy bien!": "msg_muybien", "Intenta de nuevo": "msg_intentanuevo", "Debes tocar más sílabas": "msg_toca_silabas", "Primero escucha la palabra del día": "msg_escucha_palabradia", "Toca las palabras del texto para escucharlas": "msg_toca_lectura", "Debes completar todos los ejercicios": "msg_completa_armar", "Debes completar el dictado completo": "msg_completa_dictado", "Debes responder todas las frases": "msg_completa_escritura", "Debes responder todas las preguntas": "msg_completa_preguntas", "Juega al menos tres rondas": "msg_juega_rondas", "Debes completar más asociaciones": "msg_completa_asociar", "Escucha de nuevo e intenta otra vez": "msg_escucha_intenta", "Asocia las sílabas para formar palabras. Toca izquierda, luego derecha.": "msg_instruccion_asociar", "¡Muy bien! Lectura lograda.": "msg_logro_lectura", "Muy bien, lectura lograda": "msg_logro_lectura", "¡Muy bien! Frase correcta.": "msg_muybien", "¡Muy bien! La palabra es ": "msg_muybien", "Hola Catalina, bienvenida. Continuamos donde quedaste.": "msg_hola_catalina", "Catalina, ahora vamos a Sílabas": "msg_vamos_silabas_catalina", "Catalina, ahora vamos a Palabra del día": "msg_vamos_palabradia_catalina", "Catalina, ahora vamos a Lectura": "msg_vamos_lectura_catalina", "Catalina, ahora vamos a Armar palabras": "msg_vamos_armar_catalina", "Catalina, ahora vamos a Dictado": "msg_vamos_dictado_catalina", "Catalina, ahora vamos a Escritura": "msg_vamos_escritura_catalina", "Catalina, ahora vamos a Discriminación": "msg_vamos_discriminar_catalina", "Catalina, ahora vamos a Lotería": "msg_vamos_loteria_catalina", "Catalina, ahora vamos a Asociar": "msg_vamos_asociar_catalina", "¡Muy bien Catalina! Practicaste todas las sílabas.": "msg_logro_silabas_catalina", "¡Muy bien Catalina! Completaste la lectura.": "msg_logro_lectura_catalina", "¡Excelente Catalina! Completaste el dictado.": "msg_logro_dictado_catalina", "¡Fantástico Catalina! Armaste todas las palabras.": "msg_logro_armar_catalina", "Hola Leonel, bienvenida. Continuamos donde quedaste.": "msg_hola_leonel", "Leonel, ahora vamos a Sílabas": "msg_vamos_silabas_leonel", "Leonel, ahora vamos a Palabra del día": "msg_vamos_palabradia_leonel", "Leonel, ahora vamos a Lectura": "msg_vamos_lectura_leonel", "Leonel, ahora vamos a Armar palabras": "msg_vamos_armar_leonel", "Leonel, ahora vamos a Dictado": "msg_vamos_dictado_leonel", "Leonel, ahora vamos a Escritura": "msg_vamos_escritura_leonel", "Leonel, ahora vamos a Discriminación": "msg_vamos_discriminar_leonel", "Leonel, ahora vamos a Lotería": "msg_vamos_loteria_leonel", "Leonel, ahora vamos a Asociar": "msg_vamos_asociar_leonel", "¡Muy bien Leonel! Practicaste todas las sílabas.": "msg_logro_silabas_leonel", "¡Muy bien Leonel! Completaste la lectura.": "msg_logro_lectura_leonel", "¡Excelente Leonel! Completaste el dictado.": "msg_logro_dictado_leonel", "¡Fantástico Leonel! Armaste todas las palabras.": "msg_logro_armar_leonel", "Hola Pedro, bienvenida. Continuamos donde quedaste.": "msg_hola_pedro", "Pedro, ahora vamos a Sílabas": "msg_vamos_silabas_pedro", "Pedro, ahora vamos a Palabra del día": "msg_vamos_palabradia_pedro", "Pedro, ahora vamos a Lectura": "msg_vamos_lectura_pedro", "Pedro, ahora vamos a Armar palabras": "msg_vamos_armar_pedro", "Pedro, ahora vamos a Dictado": "msg_vamos_dictado_pedro", "Pedro, ahora vamos a Escritura": "msg_vamos_escritura_pedro", "Pedro, ahora vamos a Discriminación": "msg_vamos_discriminar_pedro", "Pedro, ahora vamos a Lotería": "msg_vamos_loteria_pedro", "Pedro, ahora vamos a Asociar": "msg_vamos_asociar_pedro", "¡Muy bien Pedro! Practicaste todas las sílabas.": "msg_logro_silabas_pedro", "¡Muy bien Pedro! Completaste la lectura.": "msg_logro_lectura_pedro", "¡Excelente Pedro! Completaste el dictado.": "msg_logro_dictado_pedro", "¡Fantástico Pedro! Armaste todas las palabras.": "msg_logro_armar_pedro", "Hola Miguel, bienvenida. Continuamos donde quedaste.": "msg_hola_miguel", "Miguel, ahora vamos a Sílabas": "msg_vamos_silabas_miguel", "Miguel, ahora vamos a Palabra del día": "msg_vamos_palabradia_miguel", "Miguel, ahora vamos a Lectura": "msg_vamos_lectura_miguel", "Miguel, ahora vamos a Armar palabras": "msg_vamos_armar_miguel", "Miguel, ahora vamos a Dictado": "msg_vamos_dictado_miguel", "Miguel, ahora vamos a Escritura": "msg_vamos_escritura_miguel", "Miguel, ahora vamos a Discriminación": "msg_vamos_discriminar_miguel", "Miguel, ahora vamos a Lotería": "msg_vamos_loteria_miguel", "Miguel, ahora vamos a Asociar": "msg_vamos_asociar_miguel", "¡Muy bien Miguel! Practicaste todas las sílabas.": "msg_logro_silabas_miguel", "¡Muy bien Miguel! Completaste la lectura.": "msg_logro_lectura_miguel", "¡Excelente Miguel! Completaste el dictado.": "msg_logro_dictado_miguel", "¡Fantástico Miguel! Armaste todas las palabras.": "msg_logro_armar_miguel"};
+
 function _rutaAudio(txt){
-  const t = txt.trim().toLowerCase();
+  const t = txt.trim();
+  // Buscar primero en el mapa exacto
+  if(_AUDIO_MAPA[t]) return 'audio/mensajes/'+_AUDIO_MAPA[t]+'.mp3';
+  // Buscar versión en minúsculas
+  const tl = t.toLowerCase();
+  if(_AUDIO_MAPA[tl]) return 'audio/mensajes/'+_AUDIO_MAPA[tl]+'.mp3';
+  // Búsqueda por prefijo (para mensajes con nombre dinámico)
+  for(const k of Object.keys(_AUDIO_MAPA)){
+    if(t.startsWith(k) || tl.startsWith(k.toLowerCase())){
+      return 'audio/mensajes/'+_AUDIO_MAPA[k]+'.mp3';
+    }
+  }
+  // Fallback por tipo de texto
   const s = (function(x){
-    x = x.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    x = x.replace(/ñ/g,'n').replace(/[^a-z0-9]/g,'_');
+    x = x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    x = x.replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
     return x;
   })(t);
   if(t.length <= 3 && !/\s/.test(t)) return 'audio/silabas/sil_'+s+'.mp3';
-  else if(t.split(' ').length > 2) return 'audio/mensajes/msg_'+s+'.mp3';
+  else if(t.split(' ').length === 1) return 'audio/palabras/pal_'+s+'.mp3';
   else return 'audio/palabras/pal_'+s+'.mp3';
 }
 
@@ -2039,18 +2054,14 @@ function marcarSecLograda(sec){
   const idx = ORDEN_SECS.indexOf(sec);
   const siguiente = ORDEN_SECS[idx+1];
   if(siguiente){
-    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar',escritura:'Escritura'};
-    const nombreSig = nombres[siguiente] || siguiente;
+    const nombresMap = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',escritura:'Escritura',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar'};
+    const nombreSig = nombresMap[siguiente] || siguiente;
     const nom = nombreAlumna || '';
-    // Solo aquí se dice el nombre — al inicio de cada nueva sección
-    const msg = nom
-      ? nom + ', ahora vamos a ' + nombreSig
-      : 'Ahora vamos a ' + nombreSig;
-    hablar(msg, velocidad);
-    setTimeout(()=>{
-      const btn = document.getElementById('tab-btn-'+siguiente);
-      if(btn) btn.click();
-    }, 2000);
+    const msg = nom ? nom+', ahora vamos a '+nombreSig : 'Ahora vamos a '+nombreSig;
+    // Cambiar sección inmediatamente
+    _irSeccion(siguiente);
+    // Decir el mensaje después
+    setTimeout(()=> hablar(msg, velocidad), 400);
   } else {
     completar();
   }
