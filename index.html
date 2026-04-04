@@ -1119,9 +1119,12 @@ const CORRECCIONES_FONETICAS = {
 
 // ── Sistema de audio MP3 + TTS de respaldo ──────────────────
 const _audioFaltante = new Set();
-const _audioCache = {}; // AudioBuffer cacheado por ruta
+const _audioCache = {}; // AudioBuffer cacheado por ruta (desktop)
+const _audioOffsets = {}; // segundos a saltar por silencio (móvil)
 let _audioCtx = null;
 let _audioActualNode = null;
+let _audioActualEl = null;
+const _esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 function _getCtx(){
   if(!_audioCtx || _audioCtx.state === 'closed'){
@@ -1129,6 +1132,20 @@ function _getCtx(){
   }
   if(_audioCtx.state === 'suspended') _audioCtx.resume();
   return _audioCtx;
+}
+
+// Desbloquear AudioContext en el primer toque (necesario en iOS)
+function _desbloquearAudio(){
+  if(_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
+  if(!_audioCtx){
+    try {
+      _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      // Reproducir silencio para desbloquear
+      const buf = _audioCtx.createBuffer(1,1,22050);
+      const src = _audioCtx.createBufferSource();
+      src.buffer = buf; src.connect(_audioCtx.destination); src.start(0);
+    } catch(e){}
+  }
 }
 
 // Mapa de texto → nombre de archivo de audio
@@ -1159,25 +1176,24 @@ function _rutaAudio(txt){
 }
 
 function _recortarSilencio(buffer){
-  // Encuentra el primer sample con energía real y recorta desde ahí
   const umbral = 0.008;
   const data = buffer.getChannelData(0);
   const sr = buffer.sampleRate;
   let inicio = 0;
   for(let i = 0; i < data.length; i++){
     if(Math.abs(data[i]) > umbral){
-      inicio = Math.max(0, i - Math.floor(sr * 0.02)); // 20ms antes
+      inicio = Math.max(0, i - Math.floor(sr * 0.02));
       break;
     }
   }
-  if(inicio < Math.floor(sr * 0.05)) return buffer; // menos de 50ms, no recortar
+  if(inicio < Math.floor(sr * 0.05)) return {buffer, offset: 0};
   const ctx = _getCtx();
   const len = buffer.length - inicio;
   const nuevo = ctx.createBuffer(buffer.numberOfChannels, len, sr);
   for(let c = 0; c < buffer.numberOfChannels; c++){
     nuevo.getChannelData(c).set(buffer.getChannelData(c).subarray(inicio));
   }
-  return nuevo;
+  return {buffer: nuevo, offset: inicio/sr};
 }
 
 function _reproducirBuffer(buffer){
@@ -1192,17 +1208,57 @@ function _reproducirBuffer(buffer){
   } catch(e){ console.warn('audio error:', e); }
 }
 
+function _reproducirMovil(ruta){
+  // En iOS: usar HTMLAudioElement + currentTime para saltar silencio
+  if(_audioActualEl){
+    try{ _audioActualEl.pause(); }catch(e){}
+  }
+  const audio = new Audio(ruta);
+  _audioActualEl = audio;
+  const offset = _audioOffsets[ruta] || 0;
+  audio.addEventListener('canplay', ()=>{
+    if(offset > 0) audio.currentTime = offset;
+    audio.play().catch(()=>{});
+  }, {once: true});
+  audio.addEventListener('error', ()=>{
+    _audioFaltante.add(ruta); 
+  }, {once: true});
+  audio.load();
+}
+
 function hablar(txt, r){
   if(!txt||!txt.trim()) return;
   const ruta = _rutaAudio(txt);
 
-  // Si ya sabemos que no existe, usar TTS
   if(_audioFaltante.has(ruta)){ _hablarTTS(txt,r); return; }
 
-  // Si está en caché, reproducir directo sin silencio
+  if(_esMovil){
+    // En móvil: usar HTMLAudioElement (compatible con iOS sin restricciones)
+    if(ruta in _audioOffsets){
+      _reproducirMovil(ruta); return;
+    }
+    // Primera vez: medir offset de silencio con fetch+WebAudio si el ctx está listo
+    if(_audioCtx && _audioCtx.state === 'running'){
+      fetch(ruta)
+        .then(res=>{ if(!res.ok) throw new Error('404'); return res.arrayBuffer(); })
+        .then(ab=> _audioCtx.decodeAudioData(ab))
+        .then(buf=>{
+          const {offset} = _recortarSilencio(buf);
+          _audioOffsets[ruta] = offset;
+          _reproducirMovil(ruta);
+        })
+        .catch(()=>{ _audioOffsets[ruta]=0; _reproducirMovil(ruta); });
+    } else {
+      // AudioContext no está listo → reproducir sin offset
+      _audioOffsets[ruta] = 0;
+      _reproducirMovil(ruta);
+    }
+    return;
+  }
+
+  // ESCRITORIO: Web Audio API con recorte de silencio
   if(_audioCache[ruta]){ _reproducirBuffer(_audioCache[ruta]); return; }
 
-  // Cargar, decodificar y recortar silencio inicial
   fetch(ruta)
     .then(res=>{ if(!res.ok) throw new Error('404'); return res.arrayBuffer(); })
     .then(ab=>{
@@ -1210,7 +1266,7 @@ function hablar(txt, r){
       return ctx.decodeAudioData(ab);
     })
     .then(buf=>{
-      const recortado = _recortarSilencio(buf);
+      const {buffer: recortado} = _recortarSilencio(buf);
       _audioCache[ruta] = recortado;
       _reproducirBuffer(recortado);
     })
@@ -2978,8 +3034,8 @@ function avanzarDiaDocente(){
 
 // La app espera el login. Si ya hay sesión en localStorage la restaura.
 // Desbloquear audio en cada toque - iOS requiere esto
-document.addEventListener('touchstart', desbloquearVoz, {passive:true});
-document.addEventListener('click', desbloquearVoz, {passive:true});
+document.addEventListener('touchstart', ()=>{ desbloquearVoz(); _desbloquearAudio(); }, {passive:true});
+document.addEventListener('click', ()=>{ desbloquearVoz(); _desbloquearAudio(); }, {passive:true});
 
 // Cargar voces con reintentos
 if(window.speechSynthesis){
