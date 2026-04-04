@@ -2219,15 +2219,7 @@ function seccionCompletada(sec){
       }
       return true;
     case 'silabas':
-      // Debe haber tocado al menos la mitad de las sílabas
-      const silTouch = parseInt(sessionStorage.getItem('sil_tocadas_'+diaActual)||'0');
-      const silTotal = d.silabas ? d.silabas.length : 1;
-      if(silTouch < Math.ceil(silTotal/2)){
-        mostrarBurbuja('⚠️ Toca más sílabas primero (' + silTouch + '/' + silTotal + ')');
-        hablar('Toca más sílabas antes de continuar', velocidad);
-        return false;
-      }
-      return true;
+      return true; // sílabas siempre se puede lograr
     case 'escritura':
       // Debe haber verificado al menos 1 frase
       const escritOk = document.querySelectorAll('.dict-resultado.ok').length;
