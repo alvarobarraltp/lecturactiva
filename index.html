@@ -1117,84 +1117,48 @@ const CORRECCIONES_FONETICAS = {
   'va': 'va,', 've': 've,', 'vi': 'vi,', 'vo': 'vo,', 'vu': 'vu,',
 };
 
-// ── Sistema de audio con MP3 reales + TTS de respaldo ──────
-// Caché de audios ya cargados
-const _audioCache = {};
-// Caché de archivos que NO existen (para no reintentar)
-const _audioFaltante = new Set();
-
-function _rutaAudio(txt){
-  const t = txt.trim().toLowerCase();
-  const s = (function(x){
-    x = x.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    x = x.replace(/ñ/g,'n').replace(/[^a-z0-9]/g,'_');
-    return x;
-  })(t);
-  // Determinar prefijo y carpeta
-  if(t.length <= 3 && !/\s/.test(t)){
-    return 'audio/silabas/sil_'+s+'.mp3';
-  } else if(t.split(' ').length > 2){
-    return 'audio/mensajes/msg_'+s+'.mp3';
-  } else {
-    return 'audio/palabras/pal_'+s+'.mp3';
-  }
-}
-
 function hablar(txt, r){
   if(!txt || !txt.trim()) return;
-  const ruta = _rutaAudio(txt);
-
-  // Si ya sabemos que no existe, usar TTS directo
-  if(_audioFaltante.has(ruta)){
-    _hablarTTS(txt, r);
-    return;
-  }
-
-  // Intentar reproducir MP3 real
-  try {
-    let audio;
-    if(_audioCache[ruta]){
-      audio = new Audio(_audioCache[ruta]);
-    } else {
-      audio = new Audio(ruta);
-    }
-    audio.playbackRate = Math.min(r || velocidad || 0.5, 0.8) * 1.5;
-    audio.play().then(()=>{
-      console.log('🔊 MP3:', ruta);
-    }).catch(()=>{
-      // MP3 no existe → usar TTS y recordar que falta
-      _audioFaltante.add(ruta);
-      _hablarTTS(txt, r);
-    });
-  } catch(e){
-    _audioFaltante.add(ruta);
-    _hablarTTS(txt, r);
-  }
-}
-
-function _hablarTTS(txt, r){
   if(!window.speechSynthesis) return;
-  // Corrección fonética para TTS
+  // Corregir sílabas que el TTS interpreta mal
   const txtn = txt.trim().toLowerCase();
   const corregido = CORRECCIONES_FONETICAS[txtn] || txt;
+
   try { window.speechSynthesis.cancel(); } catch(e){}
+
   const u = new SpeechSynthesisUtterance(corregido);
   u.lang = 'es-MX';
   u.rate = Math.min(r || velocidad || 0.5, 0.55);
   u.volume = 1;
-  u.pitch = vozActual === 'nino' ? 1.4 : 1.0;
-  const vv = window.speechSynthesis.getVoices();
-  if(vv.length){
-    const v = vv.find(v=>v.name==='Paulina')
-      || vv.find(v=>v.name==='Mónica')
-      || vv.find(v=>v.lang==='es-MX')
-      || vv.find(v=>v.lang.startsWith('es'));
+  u.pitch = (vozActual === 'nino') ? 1.3 : 1.0;
+
+  // Usar voces detectadas
+  const voces = window.speechSynthesis.getVoices();
+  if(voces.length){
+    let v = null;
+    if(vozActual === 'paulina'){
+      v = voces.find(v => v.name === 'Paulina')
+        || voces.find(v => v.name === 'Mónica')
+        || voces.find(v => v.name.toLowerCase().includes('paulina'))
+        || voces.find(v => v.name.toLowerCase().includes('monica'))
+        || voces.find(v => v.lang === 'es-MX')
+        || voces.find(v => v.lang.startsWith('es'));
+    } else {
+      v = voces.find(v => v.lang.startsWith('es') && v !== voces.find(x=>x.name==='Paulina'))
+        || voces.find(v => v.lang.startsWith('es'));
+    }
     if(v) u.voice = v;
   }
-  u.onerror = e=>{ if(e.error!=='interrupted') console.warn('TTS:',e.error); };
+
+  u.onerror = e => { if(e.error !== 'interrupted') console.warn('TTS:', e.error); };
   window.speechSynthesis.speak(u);
 }
 
+
+// ── Sección Asociar ────────────────────────────────────────
+let _asocPalabras = [];
+let _asocIzqSel = null;  // índice seleccionado en izquierda
+let _asocEmparejadas = new Set(); // palabras ya completadas
 
 function obtenerPalabrasAsociar(d){
   const candidatas = [];
@@ -2046,18 +2010,21 @@ function marcarSecLograda(sec){
   const idx = ORDEN_SECS.indexOf(sec);
   const siguiente = ORDEN_SECS[idx+1];
   if(siguiente){
-    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar',escritura:'Escritura'};
+    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',escritura:'Escritura',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar'};
     const nombreSig = nombres[siguiente] || siguiente;
     const nom = nombreAlumna || '';
-    // Solo aquí se dice el nombre — al inicio de cada nueva sección
-    const msg = nom
-      ? nom + ', ahora vamos a ' + nombreSig
-      : 'Ahora vamos a ' + nombreSig;
-    hablar(msg, velocidad);
-    setTimeout(()=>{
-      const btn = document.getElementById('tab-btn-'+siguiente);
-      if(btn) btn.click();
-    }, 2000);
+    const msg = nom ? nom + ', ahora vamos a ' + nombreSig : 'Ahora vamos a ' + nombreSig;
+    // Pasar a la siguiente sección PRIMERO, luego hablar
+    const btn = document.getElementById('tab-btn-'+siguiente);
+    if(btn){
+      btn.click();
+      // Hablar después de que la sección cargó
+      setTimeout(()=> hablar(msg, velocidad), 500);
+    } else {
+      // Fallback: intentar cambiarSec directamente
+      cambiarSec(siguiente, null);
+      setTimeout(()=> hablar(msg, velocidad), 500);
+    }
   } else {
     completar();
   }
