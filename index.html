@@ -2183,8 +2183,8 @@ function seccionCompletada(sec){
       }
       return true;
     case 'dictado':
-      // Debe haber respondido todas las palabras
-      const totalDict = d.palabrasDictado ? d.palabrasDictado.length : 0;
+      // Solo 8 palabras se muestran en htmlDictado (slice 0,8)
+      const totalDict = Math.min(d.palabrasDictado ? d.palabrasDictado.length : 0, 8);
       const dictItems = document.querySelectorAll('.dict-item.correcta, .dict-item.incorrecta');
       if(dictItems.length < totalDict){
         mostrarBurbuja('⚠️ Completa todo el dictado primero (' + dictItems.length + '/' + totalDict + ')');
