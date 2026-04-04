@@ -1117,48 +1117,95 @@ const CORRECCIONES_FONETICAS = {
   'va': 'va,', 've': 've,', 'vi': 'vi,', 'vo': 'vo,', 'vu': 'vu,',
 };
 
+// ── Sistema de audio MP3 + TTS de respaldo ──────────────────
+const _audioFaltante = new Set();
+const _audioBufferCache = {};
+
+function _rutaAudio(txt){
+  const t = txt.trim().toLowerCase();
+  const s = (function(x){
+    x = x.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    x = x.replace(/ñ/g,'n').replace(/[^a-z0-9]/g,'_');
+    return x;
+  })(t);
+  if(t.length <= 3 && !/\s/.test(t)) return 'audio/silabas/sil_'+s+'.mp3';
+  else if(t.split(' ').length > 2) return 'audio/mensajes/msg_'+s+'.mp3';
+  else return 'audio/palabras/pal_'+s+'.mp3';
+}
+
+function _recortarSilencio(buffer){
+  const umbral = 0.01;
+  const data = buffer.getChannelData(0);
+  const sr = buffer.sampleRate;
+  let inicio = 0;
+  for(let i=0;i<data.length;i++){
+    if(Math.abs(data[i])>umbral){ inicio=Math.max(0,i-Math.floor(sr*0.03)); break; }
+  }
+  if(inicio===0) return buffer;
+  const nuevoLen = buffer.length - inicio;
+  const ctx2 = new (window.AudioContext||window.webkitAudioContext)();
+  const nuevo = ctx2.createBuffer(buffer.numberOfChannels, nuevoLen, sr);
+  for(let c=0;c<buffer.numberOfChannels;c++){
+    const vd=buffer.getChannelData(c), nd=nuevo.getChannelData(c);
+    for(let i=0;i<nuevoLen;i++) nd[i]=vd[inicio+i];
+  }
+  return nuevo;
+}
+
+function _reproducirBuffer(buffer){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended') ctx.resume();
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ctx.destination);
+    src.start(0);
+  } catch(e){ console.warn('buffer error:',e); }
+}
+
 function hablar(txt, r){
-  if(!txt || !txt.trim()) return;
+  if(!txt||!txt.trim()) return;
+  const ruta = _rutaAudio(txt);
+
+  // Si sabemos que no existe el MP3, usar TTS directo
+  if(_audioFaltante.has(ruta)){ _hablarTTS(txt,r); return; }
+
+  // Si ya está en caché, reproducir directo
+  if(_audioBufferCache[ruta]){ _reproducirBuffer(_audioBufferCache[ruta]); return; }
+
+  // Intentar cargar MP3
+  fetch(ruta)
+    .then(res=>{ if(!res.ok) throw new Error('404'); return res.arrayBuffer(); })
+    .then(ab=>{
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      return ctx.decodeAudioData(ab);
+    })
+    .then(buf=>{
+      const recortado = _recortarSilencio(buf);
+      _audioBufferCache[ruta] = recortado;
+      _reproducirBuffer(recortado);
+    })
+    .catch(()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); });
+}
+
+function _hablarTTS(txt, r){
   if(!window.speechSynthesis) return;
-  // Corregir sílabas que el TTS interpreta mal
   const txtn = txt.trim().toLowerCase();
   const corregido = CORRECCIONES_FONETICAS[txtn] || txt;
-
   try { window.speechSynthesis.cancel(); } catch(e){}
-
   const u = new SpeechSynthesisUtterance(corregido);
-  u.lang = 'es-MX';
-  u.rate = Math.min(r || velocidad || 0.5, 0.55);
-  u.volume = 1;
-  u.pitch = (vozActual === 'nino') ? 1.3 : 1.0;
-
-  // Usar voces detectadas
-  const voces = window.speechSynthesis.getVoices();
-  if(voces.length){
-    let v = null;
-    if(vozActual === 'paulina'){
-      v = voces.find(v => v.name === 'Paulina')
-        || voces.find(v => v.name === 'Mónica')
-        || voces.find(v => v.name.toLowerCase().includes('paulina'))
-        || voces.find(v => v.name.toLowerCase().includes('monica'))
-        || voces.find(v => v.lang === 'es-MX')
-        || voces.find(v => v.lang.startsWith('es'));
-    } else {
-      v = voces.find(v => v.lang.startsWith('es') && v !== voces.find(x=>x.name==='Paulina'))
-        || voces.find(v => v.lang.startsWith('es'));
-    }
-    if(v) u.voice = v;
+  u.lang='es-MX'; u.rate=Math.min(r||velocidad||0.5,0.55); u.volume=1;
+  u.pitch = vozActual==='nino' ? 1.4 : 1.0;
+  const vv = window.speechSynthesis.getVoices();
+  if(vv.length){
+    const v = vv.find(v=>v.name==='Paulina')||vv.find(v=>v.name==='Mónica')
+      ||vv.find(v=>v.lang==='es-MX')||vv.find(v=>v.lang.startsWith('es'));
+    if(v) u.voice=v;
   }
-
-  u.onerror = e => { if(e.error !== 'interrupted') console.warn('TTS:', e.error); };
+  u.onerror=e=>{if(e.error!=='interrupted')console.warn('TTS:',e.error);};
   window.speechSynthesis.speak(u);
 }
 
-
-// ── Sección Asociar ────────────────────────────────────────
-let _asocPalabras = [];
-let _asocIzqSel = null;  // índice seleccionado en izquierda
-let _asocEmparejadas = new Set(); // palabras ya completadas
 
 function obtenerPalabrasAsociar(d){
   const candidatas = [];
@@ -2010,21 +2057,18 @@ function marcarSecLograda(sec){
   const idx = ORDEN_SECS.indexOf(sec);
   const siguiente = ORDEN_SECS[idx+1];
   if(siguiente){
-    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',escritura:'Escritura',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar'};
+    const nombres = {silabas:'Sílabas',palabradia:'Palabra del día',lectura:'Lectura',armar:'Armar palabras',dictado:'Dictado',discriminar:'Discriminación',loteria:'Lotería',asociar:'Asociar',escritura:'Escritura'};
     const nombreSig = nombres[siguiente] || siguiente;
     const nom = nombreAlumna || '';
-    const msg = nom ? nom + ', ahora vamos a ' + nombreSig : 'Ahora vamos a ' + nombreSig;
-    // Pasar a la siguiente sección PRIMERO, luego hablar
-    const btn = document.getElementById('tab-btn-'+siguiente);
-    if(btn){
-      btn.click();
-      // Hablar después de que la sección cargó
-      setTimeout(()=> hablar(msg, velocidad), 500);
-    } else {
-      // Fallback: intentar cambiarSec directamente
-      cambiarSec(siguiente, null);
-      setTimeout(()=> hablar(msg, velocidad), 500);
-    }
+    // Solo aquí se dice el nombre — al inicio de cada nueva sección
+    const msg = nom
+      ? nom + ', ahora vamos a ' + nombreSig
+      : 'Ahora vamos a ' + nombreSig;
+    hablar(msg, velocidad);
+    setTimeout(()=>{
+      const btn = document.getElementById('tab-btn-'+siguiente);
+      if(btn) btn.click();
+    }, 2000);
   } else {
     completar();
   }
