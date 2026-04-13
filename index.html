@@ -1124,8 +1124,7 @@ const CORRECCIONES_FONETICAS = {
 
 // ── Sistema de audio MP3 + TTS de respaldo ──────────────────
 const _audioFaltante = new Set();
-const _audioEl = {}; // Audio() precargado por ruta
-let _audioActual = null;
+
 
 function _desbloquearAudio(){
   // No-op: Audio() nativo no necesita desbloqueo explícito
@@ -1152,32 +1151,54 @@ function _rutaAudio(txt){
   return 'audio/palabras/pal_'+s+'.mp3';
 }
 
-// Offsets de silencio por ruta (en segundos)
-const _audioOffsets = {};
+// Cache de AudioBuffers ya recortados (listos para reproducir sin silencio)
+const _bufferCache = {};
+let _audioCtx = null;
+let _srcActual = null;
 
-function _medirOffset(ruta, cb){
-  // Usa Web Audio API para detectar dónde empieza el sonido real
-  if(!window.AudioContext && !window.webkitAudioContext){ cb(0); return; }
+function _ctx(){
+  if(!_audioCtx || _audioCtx.state==='closed')
+    _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(_audioCtx.state==='suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function _recortar(buf){
+  const data = buf.getChannelData(0), sr = buf.sampleRate;
+  const umbral = 0.008;
+  let ini = 0;
+  for(let i=0;i<data.length;i++){
+    if(Math.abs(data[i])>umbral){ ini=Math.max(0,i-Math.floor(sr*0.02)); break; }
+  }
+  if(ini < Math.floor(sr*0.04)) return buf;
+  const ctx = _ctx();
+  const nb = ctx.createBuffer(buf.numberOfChannels, buf.length-ini, sr);
+  for(let c=0;c<buf.numberOfChannels;c++)
+    nb.getChannelData(c).set(buf.getChannelData(c).subarray(ini));
+  return nb;
+}
+
+function _tocarBuffer(buf){
+  if(_srcActual){ try{_srcActual.stop();}catch(e){} }
+  const ctx = _ctx();
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.start(0);
+  _srcActual = src;
+}
+
+function _cargarYCachar(ruta, cb){
+  if(_audioFaltante.has(ruta)){ cb && cb(null); return; }
+  if(_bufferCache[ruta]){ cb && cb(_bufferCache[ruta]); return; }
   fetch(ruta)
-    .then(res=>{ if(!res.ok) throw new Error('404'); return res.arrayBuffer(); })
-    .then(ab=>{
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
-      return ctx.decodeAudioData(ab);
-    })
+    .then(r=>{ if(!r.ok) throw new Error('404'); return r.arrayBuffer(); })
+    .then(ab=> _ctx().decodeAudioData(ab))
     .then(buf=>{
-      const data = buf.getChannelData(0);
-      const sr = buf.sampleRate;
-      const umbral = 0.008;
-      let inicio = 0;
-      for(let i=0; i<data.length; i++){
-        if(Math.abs(data[i]) > umbral){
-          inicio = Math.max(0, (i/sr) - 0.02); // 20ms antes
-          break;
-        }
-      }
-      cb(inicio < 0.05 ? 0 : inicio); // ignorar si menos de 50ms
+      _bufferCache[ruta] = _recortar(buf);
+      cb && cb(_bufferCache[ruta]);
     })
-    .catch(()=>cb(0));
+    .catch(()=>{ _audioFaltante.add(ruta); cb && cb(null); });
 }
 
 function hablar(txt, r){
@@ -1185,59 +1206,26 @@ function hablar(txt, r){
   const ruta = _rutaAudio(txt);
   if(_audioFaltante.has(ruta)){ _hablarTTS(txt,r); return; }
 
-  if(_audioActual){
-    try{ _audioActual.pause(); _audioActual.currentTime=0; }catch(e){}
-  }
+  // Si ya está en caché → reproducir INSTANTÁNEO sin silencio
+  if(_bufferCache[ruta]){ _tocarBuffer(_bufferCache[ruta]); return; }
 
-  const audio = _audioEl[ruta] || new Audio(ruta);
-  _audioActual = audio;
-
-  const _play = ()=>{
-    const offset = _audioOffsets[ruta] || 0;
-    audio.currentTime = offset;
-    audio.play().catch(()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); });
-  };
-
-  if(audio.readyState >= 3){
-    _play();
-  } else {
-    audio.addEventListener('canplaythrough', _play, {once:true});
-    audio.addEventListener('error', ()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); }, {once:true});
-    const t2 = setTimeout(()=>{ _audioFaltante.add(ruta); _hablarTTS(txt,r); }, 3000);
-    audio.addEventListener('canplaythrough', ()=>clearTimeout(t2), {once:true});
-    if(!_audioEl[ruta]){
-      _audioEl[ruta] = audio;
-      audio.load();
-    }
-  }
+  // Si no está en caché → cargar, recortar y reproducir
+  _cargarYCachar(ruta, buf=>{
+    if(buf) _tocarBuffer(buf);
+    else _hablarTTS(txt,r);
+  });
 }
 
-// Precargar audios y medir offsets de silencio
+// Precargar y recortar todos los audios del día
 function _precargarSilabas(d){
-  if(!d||!d.silabas) return;
-  d.silabas.forEach(s=>{
-    const ruta = _rutaAudio(s.s);
-    if(_audioFaltante.has(ruta)) return;
-    // Medir offset si no está calculado aún
-    if(!(ruta in _audioOffsets)){
-      _medirOffset(ruta, offset=>{
-        _audioOffsets[ruta] = offset;
-        // Precargar el Audio() element
-        if(!_audioEl[ruta]){
-          const a = new Audio(ruta);
-          a.preload = 'auto';
-          a.addEventListener('error', ()=>_audioFaltante.add(ruta), {once:true});
-          _audioEl[ruta] = a;
-          a.load();
-        }
-      });
-    } else if(!_audioEl[ruta]){
-      const a = new Audio(ruta);
-      a.preload = 'auto';
-      a.addEventListener('error', ()=>_audioFaltante.add(ruta), {once:true});
-      _audioEl[ruta] = a;
-      a.load();
-    }
+  if(!d) return;
+  const rutas = [];
+  if(d.silabas) d.silabas.forEach(s=> rutas.push(_rutaAudio(s.s)));
+  // También precargar palabras del dictado
+  if(d.palabrasDictado) d.palabrasDictado.slice(0,8).forEach(p=> rutas.push(_rutaAudio(p)));
+  rutas.forEach(ruta=>{
+    if(!_bufferCache[ruta] && !_audioFaltante.has(ruta))
+      _cargarYCachar(ruta, ()=>{});
   });
 }
 
