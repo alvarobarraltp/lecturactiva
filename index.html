@@ -101,6 +101,11 @@ body{
 .sil{border-radius:20px;border:4px solid #6366f1;text-align:center;padding:18px 8px;cursor:pointer;transition:all .18s;background:#eef2ff;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.12);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .sil:hover{border-color:#3730a3;background:#e0e7ff;transform:scale(1.06) translateY(-3px);box-shadow:0 8px 20px rgba(55,48,163,.3);}
 .sil.playing{border-color:#92400e;background:#fef3c7;transform:scale(1.1) translateY(-3px);}
+.sil.bloqueada{border-color:#d1d5db;background:#f3f4f6;cursor:not-allowed;opacity:.5;}
+.sil.bloqueada:hover{transform:none;}
+.sil.completada{border-color:#059669;background:#d1fae5;}
+.sil-puntos{display:flex;gap:4px;justify-content:center;margin-top:6px;font-size:13px;min-height:16px;}
+@keyframes pulso-verde{0%{box-shadow:0 0 0 0 rgba(5,150,105,.5);}100%{box-shadow:0 0 0 16px rgba(5,150,105,0);}}
 .sil .emoji{font-size:36px;display:block;margin-bottom:6px;}
 .sil .txt{font-size:30px;font-weight:900;color:#1e1b4b;letter-spacing:1px;}
 .sil .pal{font-size:16px;color:#374151;margin-top:4px;font-weight:700;}
@@ -2055,6 +2060,7 @@ function buildNav(){
 
 function renderDia(){
   palabraFormada=[];
+  _silActiva=0; Object.keys(_silToques).forEach(k=>delete _silToques[k]);
   const d=DIAS[diaActual];
   const c=document.getElementById('contenidoDia');
   c.innerHTML=`
@@ -2196,17 +2202,19 @@ function htmlSilabas(d){
     </div>
     <div class="silaba-grid">`;
   d.silabas.forEach((s,i)=>{
-    html+=`<div class="sil" id="sil_${i}" onclick="playSil('${s.s}',${i})">
+    const bloq = i > 0 ? 'bloqueada' : '';
+    html+=`<div class="sil ${bloq}" id="sil_${i}" onclick="playSil('${s.s}',${i})">
       <span class="emoji">${s.e}</span>
       <span class="txt">${s.s}</span>
       <span class="pal">${s.p}</span>
+      <div class="sil-puntos" id="silpts_${i}">${i===0?'⚪⚪⚪':''}</div>
     </div>`;
   });
   const silLograda = getSecLogradas().includes('silabas');
   html += `</div>
     <div class="sec-logrado-wrap">
-      <p class="sec-instruccion">Toca cada sílaba, escúchala y repítela en voz alta.</p>
-      <button class="btn-sec-logrado${silLograda?' hecho':''}" onclick="confirmarLogrado('silabas','¡Muy bien! Practicaste todas las sílabas.')">
+      <p class="sec-instruccion">Toca la sílaba activa <strong>3 veces</strong> y repítela en voz alta.</p>
+      <button class="btn-sec-logrado${silLograda?' hecho':''}" id="btn-logrado-silabas" onclick="confirmarLogrado('silabas','¡Muy bien! Practicaste todas las sílabas.')">
         ${silLograda ? '✅ ¡Sílabas logradas!' : '🏅 ¡Logré las sílabas!'}
       </button>
     </div>
@@ -2214,16 +2222,82 @@ function htmlSilabas(d){
   return html;
 }
 
-function playSil(sil,idx){
-  document.querySelectorAll('.sil').forEach(el=>el.classList.remove('playing'));
-  const el=document.getElementById('sil_'+idx);
-  if(el){ el.classList.add('playing'); el.dataset.tocada='1'; }
+// Sílabas: índice activo y contadores de toques
+let _silActiva = 0;
+const _silToques = {};
+
+function playSil(sil, idx){
+  const el = document.getElementById('sil_'+idx);
+  if(!el) return;
+
+  // Ignorar si está bloqueada (no es la activa)
+  if(el.classList.contains('bloqueada')){
+    mostrarBurbuja('🔒 Primero completa la sílaba activa');
+    return;
+  }
+
+  // Sumar toque
+  _silToques[idx] = (_silToques[idx] || 0) + 1;
+  const toques = _silToques[idx];
+
+  // Visual playing
+  el.classList.add('playing');
+  setTimeout(()=>el.classList.remove('playing'), 500);
+
+  // Reproducir
   regSil(sil,'vista',true);
-  hablar(sil,velocidad);
-  // Registrar sílabas tocadas para validación
-  const tocadas = document.querySelectorAll('.sil[data-tocada]').length;
-  sessionStorage.setItem('sil_dia_'+diaActual, tocadas);
-  setTimeout(()=>{if(el)el.classList.remove('playing');},2200);
+  hablar(sil, velocidad);
+
+  // Actualizar puntos: ⚪⚪⚪ → 🔴⚪⚪ → 🔴🔴⚪ → 🔴🔴🔴
+  const pts = document.getElementById('silpts_'+idx);
+  if(pts){
+    const n = Math.min(toques, 3);
+    pts.textContent = '🔴'.repeat(n) + '⚪'.repeat(3-n);
+  }
+
+  // Al llegar a 3 toques: completar y desbloquear la siguiente
+  if(toques === 3){
+    el.classList.add('completada');
+    el.dataset.tocada = '1';
+
+    // Registrar para validación
+    const completadas = Object.values(_silToques).filter(v=>v>=3).length;
+    sessionStorage.setItem('sil_dia_'+diaActual, completadas);
+
+    const d = DIAS[diaActual];
+    const totalSils = d.silabas ? d.silabas.length : 0;
+    const siguiente = idx + 1;
+
+    if(siguiente < totalSils){
+      // Desbloquear la siguiente sílaba
+      setTimeout(()=>{
+        const elSig = document.getElementById('sil_'+siguiente);
+        if(elSig){
+          elSig.classList.remove('bloqueada');
+          // Mostrar puntos en la siguiente
+          const ptsSig = document.getElementById('silpts_'+siguiente);
+          if(ptsSig) ptsSig.textContent = '⚪⚪⚪';
+          // Scroll suave a la siguiente
+          elSig.scrollIntoView({behavior:'smooth', block:'center'});
+          // Pequeña animación para llamar la atención
+          elSig.style.animation='pulso-verde .5s 2';
+          setTimeout(()=>elSig.style.animation='', 1000);
+        }
+        _silActiva = siguiente;
+      }, 400);
+    } else {
+      // Última sílaba completada — desbloquear botón logrado
+      setTimeout(()=>{
+        const btn = document.getElementById('btn-logrado-silabas');
+        if(btn && !btn.classList.contains('hecho')){
+          btn.style.animation='pulso-verde .6s 3';
+          setTimeout(()=>btn.style.animation='', 2000);
+          mostrarBurbuja('🎉 ¡Completaste todas las sílabas! Presiona Logrado');
+        }
+        _silActiva = siguiente;
+      }, 400);
+    }
+  }
 }
 
 function setVel(v,btn){
@@ -2262,12 +2336,10 @@ function seccionCompletada(sec){
   switch(sec){
 
     case 'silabas':
-      // Debe haber tocado al menos la mitad de las sílabas
-      const silTocadas = document.querySelectorAll('.sil.playing, .sil[data-tocada]').length
-        || parseInt(sessionStorage.getItem('sil_dia_'+diaActual)||'0');
+      const silCompletadas = Object.values(_silToques).filter(v=>v>=3).length;
       const silTotal = d.silabas ? d.silabas.length : 1;
-      if(silTocadas < Math.ceil(silTotal/2)){
-        return msg('⚠️ Toca al menos la mitad de las sílabas ('+silTocadas+'/'+silTotal+')',
+      if(silCompletadas < silTotal){
+        return msg('⚠️ Completa todas las sílabas ('+silCompletadas+'/'+silTotal+')',
           'Debes tocar más sílabas');
       }
       return true;
