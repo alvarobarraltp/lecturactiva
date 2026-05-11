@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_45.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_47.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -971,13 +971,17 @@ async function guardarNube(){
   } catch(e){ console.warn('Error al guardar en nube',e); }
 }
 
+let _guardarTimer = null;
 function guardar(){
+  // Guardar en localStorage inmediatamente (rápido y sin red)
   localStorage.setItem('dc',JSON.stringify([...diasComp]));
   localStorage.setItem('pts',puntos);
   localStorage.setItem('dia_actual', diaActual);
   if(binIdActual) localStorage.setItem('bin_sesion', binIdActual);
   if(nombreAlumna) localStorage.setItem('nombre_alumna', nombreAlumna);
-  guardarNube();
+  // Guardar en nube con debounce de 1.5s para evitar múltiples llamadas
+  clearTimeout(_guardarTimer);
+  _guardarTimer = setTimeout(()=> guardarNube(), 1500);
 }
 
 // ── Sistema de voces simplificado ──────────────────────────
@@ -3119,6 +3123,22 @@ function avanzarDiaDocente(){
 // Desbloquear audio en cada toque - iOS requiere esto
 document.addEventListener('touchstart', ()=>{ desbloquearVoz(); _desbloquearAudio(); }, {passive:true});
 document.addEventListener('click', ()=>{ desbloquearVoz(); _desbloquearAudio(); }, {passive:true});
+// Guardar inmediatamente antes de cerrar la página
+window.addEventListener('beforeunload', ()=>{
+  clearTimeout(_guardarTimer);
+  guardarNube();
+});
+window.addEventListener('pagehide', ()=>{
+  clearTimeout(_guardarTimer);
+  guardarNube();
+});
+// También al volver a la app (visibilitychange)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden' && binIdActual && !modoInvitado){
+    clearTimeout(_guardarTimer);
+    guardarNube();
+  }
+});
 
 // Cargar voces con reintentos
 if(window.speechSynthesis){
