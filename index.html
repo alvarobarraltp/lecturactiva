@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_42.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_41.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2952,7 +2952,7 @@ function renderArmarEj(d,idx){
   if(!d)d=DIAS[diaActual];
   if(idx>=d.ejercicios.length) return`<div class="completado-overlay"><div class="trofeo">🏆</div><h2>¡Todas las palabras armadas!</h2><p>¡Excelente trabajo!</p><button class="btn-verificar" style="margin-top:12px" onclick="armarIdx=0;armarFormada=[];document.getElementById('armar-contenido').innerHTML=renderArmarEj(null,0)">🔄 Repetir</button></div>`;
   const ej=d.ejercicios[idx];armarFormada=[];
-  const banco=[...ej.opciones].sort(()=>Math.random()-.5);
+  const banco=[...new Set(ej.opciones)].sort(()=>Math.random()-.5);
   const prog=Math.round((idx/d.ejercicios.length)*100);
   const instruccion = 'Forma la palabra ' + ej.palabra;
   // Guardar instrucción para leer al tocar el botón
@@ -2972,7 +2972,7 @@ function renderArmarEj(d,idx){
     </div>
     <p class="armar-pista">Toca las sílabas en el orden correcto 👇</p>
     <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map((op,bi)=>`<button class="armar-sil-opcion" id="armar_${bi}_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}',this)">${op}</button>`).join('')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map(op=>`<button class="armar-sil-opcion" id="armar_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}')">${op}</button>`).join('')}</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-verificar" onclick="verificarArmar('${ej.palabra}','${ej.silabas.join('-')}',${idx})">✅ Verificar</button>
       <button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar palabra</button>
@@ -2983,6 +2983,7 @@ function renderArmarEj(d,idx){
 }
 function agregarArmar(sil, btn){
   armarFormada.push(sil);
+  // Deshabilitar el botón específico tocado (no todos con esa sílaba)
   if(btn) btn.disabled=true;
   const zona=document.getElementById('armar-zona');
   if(zona)zona.innerHTML=armarFormada.map(s=>`<span class="armar-sil-puesta">${s}</span>`).join('');
