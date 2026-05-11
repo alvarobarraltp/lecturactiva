@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_41.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_45.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -870,6 +870,7 @@ let velocidad = 0.45;
 let palabraFormada = [];
 let nombreAlumna = '';
 let binIdActual = '';
+let _secLogradasCache = {}; // Cache en memoria de secLogradas
 let modoInvitado = false;
 const CLAVE_INVITADO = 'invitado';
 let silabaStats = {}; // {sil: {vistas, intentos, aciertos}}
@@ -947,8 +948,10 @@ async function cargarNube(binId){
 
 async function guardarNube(){
   if(!binIdActual || modoInvitado) return;
+  // Usar cache en memoria (más confiable que localStorage)
   const secLogradas = {};
   for(let i=0;i<20;i++){
+    if(_secLogradasCache[i]) { secLogradas[i] = _secLogradasCache[i]; continue; }
     const v = localStorage.getItem('sec_'+i);
     if(v) secLogradas[i] = JSON.parse(v);
   }
@@ -2045,6 +2048,8 @@ function renderDia(){
 const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','escritura','discriminar','loteria','asociar'];
 
 function getSecLogradas(){
+  // Usar cache en memoria si está disponible
+  if(_secLogradasCache[diaActual]) return [..._secLogradasCache[diaActual]];
   return JSON.parse(localStorage.getItem('sec_'+diaActual)||'[]');
 }
 
@@ -2052,6 +2057,8 @@ function setSecLograda(sec){
   const logradas = getSecLogradas();
   if(!logradas.includes(sec)) logradas.push(sec);
   localStorage.setItem('sec_'+diaActual, JSON.stringify(logradas));
+  // También actualizar cache en memoria
+  _secLogradasCache[diaActual] = logradas;
 }
 
 function secDesbloqueada(sec){
@@ -2952,7 +2959,7 @@ function renderArmarEj(d,idx){
   if(!d)d=DIAS[diaActual];
   if(idx>=d.ejercicios.length) return`<div class="completado-overlay"><div class="trofeo">🏆</div><h2>¡Todas las palabras armadas!</h2><p>¡Excelente trabajo!</p><button class="btn-verificar" style="margin-top:12px" onclick="armarIdx=0;armarFormada=[];document.getElementById('armar-contenido').innerHTML=renderArmarEj(null,0)">🔄 Repetir</button></div>`;
   const ej=d.ejercicios[idx];armarFormada=[];
-  const banco=[...new Set(ej.opciones)].sort(()=>Math.random()-.5);
+  const banco=[...ej.opciones].sort(()=>Math.random()-.5);
   const prog=Math.round((idx/d.ejercicios.length)*100);
   const instruccion = 'Forma la palabra ' + ej.palabra;
   // Guardar instrucción para leer al tocar el botón
@@ -2972,7 +2979,7 @@ function renderArmarEj(d,idx){
     </div>
     <p class="armar-pista">Toca las sílabas en el orden correcto 👇</p>
     <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map(op=>`<button class="armar-sil-opcion" id="armar_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}')">${op}</button>`).join('')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map((op,bi)=>`<button class="armar-sil-opcion" id="armar_${bi}_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}',this)">${op}</button>`).join('')}</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-verificar" onclick="verificarArmar('${ej.palabra}','${ej.silabas.join('-')}',${idx})">✅ Verificar</button>
       <button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar palabra</button>
@@ -2983,7 +2990,6 @@ function renderArmarEj(d,idx){
 }
 function agregarArmar(sil, btn){
   armarFormada.push(sil);
-  // Deshabilitar el botón específico tocado (no todos con esa sílaba)
   if(btn) btn.disabled=true;
   const zona=document.getElementById('armar-zona');
   if(zona)zona.innerHTML=armarFormada.map(s=>`<span class="armar-sil-puesta">${s}</span>`).join('');
@@ -3013,12 +3019,70 @@ function htmlMiProgreso(){
   </div>`;
 }
 function construirMiProgreso(){
-  const silsVistas=new Set();
-  for(let i=0;i<=diaActual;i++){if(DIAS[i])DIAS[i].silabas.forEach(s=>silsVistas.add(s.s));}
-  if(!silsVistas.size) return'<p style="color:#6b7280;font-size:14px">¡Comienza a practicar para ver tu progreso!</p>';
-  const totalDom=[...silsVistas].filter(s=>{const st=silabaStats[s]||{};return st.intentos>0&&(st.aciertos/st.intentos)>=0.8;}).length;
-  const leyenda=`<div class="progreso-leyenda"><div class="progreso-leyenda-item"><div class="progreso-leyenda-dot" style="background:#10b981"></div>Dominas ≥80%</div><div class="progreso-leyenda-item"><div class="progreso-leyenda-dot" style="background:#f59e0b"></div>Aprendiendo 50-79%</div><div class="progreso-leyenda-item"><div class="progreso-leyenda-dot" style="background:#ef4444"></div>Practicando &lt;50%</div><div class="progreso-leyenda-item"><div class="progreso-leyenda-dot" style="background:#e5e7eb"></div>Vista</div></div>`;
-  const cards=[...silsVistas].map(sil=>{
+  const totalDias = DIAS.length;
+  const diasCompletos = diasComp.size;
+  const diaHoy = diaActual + 1;
+
+  // ── Resumen general ──
+  const resumen = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+      <div style="flex:1;min-width:100px;background:#ede9fe;border-radius:14px;padding:14px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:#4f46e5">${diasCompletos}</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">Días completados</div>
+      </div>
+      <div style="flex:1;min-width:100px;background:#d1fae5;border-radius:14px;padding:14px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:#059669">${puntos}</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">⭐ Puntos</div>
+      </div>
+      <div style="flex:1;min-width:100px;background:#fef3c7;border-radius:14px;padding:14px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:#d97706">${diaHoy}</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">Día actual</div>
+      </div>
+    </div>`;
+
+  // ── Mapa de días ──
+  const nombresSecc = {silabas:'🔤',palabradia:'⭐',lectura:'📖',armar:'✏️',dictado:'📝',escritura:'✍️',discriminar:'🔍',loteria:'🎲',asociar:'🔗'};
+  let mapaDias = '<div style="margin-bottom:18px;"><div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:10px;">📅 Mapa de días</div>';
+  mapaDias += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  for(let i=0;i<totalDias;i++){
+    const comp = diasComp.has(i);
+    const activo = i === diaActual;
+    const bloq = i > diaActual;
+    let bg = '#f3f4f6', color='#9ca3af', borde='#e5e7eb', emoji='⬜';
+    if(comp){ bg='#d1fae5'; color='#059669'; borde='#059669'; emoji='✅'; }
+    else if(activo){ bg='#ede9fe'; color='#4f46e5'; borde='#4f46e5'; emoji='🔵'; }
+    else if(bloq){ emoji='🔒'; }
+    mapaDias += `<div style="width:52px;height:52px;border-radius:10px;border:2px solid ${borde};background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:${color};">
+      <span style="font-size:16px">${emoji}</span>
+      <span>Día ${i+1}</span>
+    </div>`;
+  }
+  mapaDias += '</div></div>';
+
+  // ── Secciones del día actual ──
+  const secsLogradas = getSecLogradas();
+  const ORDEN_SECS_PROG = ['silabas','palabradia','lectura','armar','dictado','escritura','discriminar','loteria','asociar'];
+  let secsDia = '<div style="margin-bottom:18px;"><div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:10px;">📋 Secciones del Día '+diaHoy+'</div>';
+  secsDia += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  ORDEN_SECS_PROG.forEach(sec=>{
+    const ok = secsLogradas.includes(sec);
+    secsDia += `<div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:${ok?'#d1fae5':'#f3f4f6'};color:${ok?'#059669':'#9ca3af'};border:2px solid ${ok?'#059669':'#e5e7eb'}">
+      ${nombresSecc[sec]||'📌'} ${ok?'✓':''}
+    </div>`;
+  });
+  secsDia += '</div></div>';
+
+  // ── Sílabas practicadas ──
+  const silsVistas = new Set();
+  for(let i=0;i<=diaActual;i++){ if(DIAS[i]) DIAS[i].silabas.forEach(s=>silsVistas.add(s.s)); }
+  
+  if(!silsVistas.size) return resumen + mapaDias + secsDia;
+
+  const totalDom = [...silsVistas].filter(s=>{
+    const st=silabaStats[s]||{}; return st.intentos>0&&(st.aciertos/st.intentos)>=0.8;
+  }).length;
+
+  const cards = [...silsVistas].map(sil=>{
     const st=silabaStats[sil]||{vistas:0,intentos:0,aciertos:0};
     const pct=st.intentos>0?Math.round((st.aciertos/st.intentos)*100):-1;
     let cls='sin-datos',em='⬜',pctTxt='Vista';
@@ -3028,7 +3092,16 @@ function construirMiProgreso(){
     else if(st.vistas>0){em='👁';}
     return`<div class="progreso-sil-card ${cls}"><span style="font-size:18px">${em}</span><span class="progreso-sil-txt">${sil}</span><span class="progreso-sil-pct">${pctTxt}</span></div>`;
   }).join('');
-  return`${leyenda}<div style="background:#ede9fe;border-radius:12px;padding:12px 16px;margin-bottom:14px"><span style="font-size:14px;font-weight:800;color:#4f46e5">🌟 Sílabas dominadas: ${totalDom} / ${silsVistas.size}</span></div><div class="progreso-sil-grid">${cards}</div>`;
+
+  const silsResumen = `<div style="margin-bottom:14px;">
+    <div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:8px;">🔤 Mis sílabas</div>
+    <div style="background:#ede9fe;border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+      <span style="font-size:14px;font-weight:800;color:#4f46e5">🌟 Dominadas: ${totalDom} / ${silsVistas.size}</span>
+    </div>
+    <div class="progreso-sil-grid">${cards}</div>
+  </div>`;
+
+  return resumen + mapaDias + secsDia + silsResumen;
 }
 function renderMiProgreso(){const el=document.getElementById('miprogreso-content');if(el)el.innerHTML=construirMiProgreso();}
 
@@ -3055,16 +3128,41 @@ if(window.speechSynthesis){
 
 const sesionGuardada = localStorage.getItem('bin_sesion');
 if(sesionGuardada){
+  // Siempre consultar la nube para tener el progreso más reciente
   binIdActual = sesionGuardada;
   nombreAlumna = localStorage.getItem('nombre_alumna')||'';
-  puntos = parseInt(localStorage.getItem('pts')||'0');
-  diasComp = new Set(JSON.parse(localStorage.getItem('dc')||'[]'));
-  diaActual = parseInt(localStorage.getItem('dia_actual')||'0');
-  cargarStatsLocal();
-  document.getElementById('login-screen').style.display='none';
-  actualizarHeaderNombre();
-  buildNav(); renderDia();
-  setTimeout(()=>{cargarVoces();actualizarUI_Voz();aplicarLogos();actualizarTabs();},400);
+  (async ()=>{
+    try {
+      const datos = await cargarNube(binIdActual);
+      nombreAlumna = datos.nombre || nombreAlumna;
+      puntos = datos.puntos || 0;
+      diasComp = new Set(datos.diasComp || []);
+      diaActual = datos.diaActual || 0;
+      if(datos.silabaStats) silabaStats = datos.silabaStats;
+      else cargarStatsLocal();
+      if(datos.secLogradas){
+        // Guardar secLogradas en memoria y localStorage
+        _secLogradasCache = datos.secLogradas;
+        Object.entries(datos.secLogradas).forEach(([k,v])=>{
+          localStorage.setItem('sec_'+k, JSON.stringify(v));
+        });
+      }
+      if(datos.obs) localStorage.setItem('obs_docente', datos.obs);
+    } catch(e){
+      // Si falla la nube, usar localStorage como respaldo
+      console.warn('No se pudo cargar desde nube, usando caché local:', e);
+      puntos = parseInt(localStorage.getItem('pts')||'0');
+      diasComp = new Set(JSON.parse(localStorage.getItem('dc')||'[]'));
+      diaActual = parseInt(localStorage.getItem('dia_actual')||'0');
+      cargarStatsLocal();
+    }
+    localStorage.setItem('bin_sesion', binIdActual);
+    localStorage.setItem('nombre_alumna', nombreAlumna);
+    document.getElementById('login-screen').style.display='none';
+    actualizarHeaderNombre();
+    buildNav(); renderDia();
+    setTimeout(()=>{cargarVoces();actualizarUI_Voz();aplicarLogos();actualizarTabs();},400);
+  })();
 } else {
   // Mostrar pantalla de login
   setTimeout(aplicarLogos, 300);
