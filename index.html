@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_47.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_49.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -413,6 +413,17 @@ body{
           <button class="docente-btn-verde" onclick="avanzarDiaDocente()">→ Avanzar día</button>
         </div>
         <p style="font-size:11px;color:#6b7280;margin-top:6px;">Solo tú puedes habilitar el siguiente día para la estudiante.</p>
+      </div>
+      <div class="docente-seccion" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fdba74;">
+        <h3>🔄 Reiniciar un día específico</h3>
+        <p style="font-size:13px;color:#6b7280;margin-bottom:10px;">Borra el progreso de un día y permite que la estudiante lo repita desde el principio.</p>
+        <div class="docente-fila" style="gap:8px;flex-wrap:wrap;">
+          <select id="dp-dia-reset-sel" style="padding:8px 12px;border-radius:10px;border:2px solid #fdba74;background:white;font-size:14px;font-weight:700;flex:1;">
+            <option value="">— Selecciona el día —</option>
+          </select>
+          <button class="docente-btn-naranja" onclick="reiniciarDiaDocente()">🔄 Reiniciar día</button>
+        </div>
+        <p style="font-size:11px;color:#92400e;margin-top:6px;">⚠️ Esta acción borrará todas las secciones completadas de ese día y no se puede deshacer.</p>
       </div>
       <div class="docente-seccion">
         <h3>🗑 Borrar datos</h3>
@@ -1636,6 +1647,17 @@ function cargarDatosPanel(){
   if(lbl) lbl.textContent = 'Día '+(diaActual+1)+' → siguiente: Día '+(diaActual+2 <= 20 ? diaActual+2 : '✅ Completado');
   const inp = document.getElementById('dp-nuevo-nombre');
   if(inp) inp.value = nombreAlumna || '';
+  // Llenar selector de días para reiniciar
+  const sel = document.getElementById('dp-dia-reset-sel');
+  if(sel){
+    sel.innerHTML = '<option value="">— Selecciona el día —</option>';
+    for(let i = 0; i <= diaActual; i++){
+      const comp = diasComp.has(i);
+      const secs = (_secLogradasCache[i]||[]).length;
+      const estado = comp ? '✅ Completado' : secs > 0 ? '🔵 En progreso ('+secs+'/9)' : '⬜ Sin iniciar';
+      sel.innerHTML += `<option value="${i}">Día ${i+1} — ${estado}</option>`;
+    }
+  }
 }
 
 function borrarDiaActual(){
@@ -3117,6 +3139,40 @@ function avanzarDiaDocente(){
   diaActual=sig;guardar();buildNav();renderDia();cargarDatosPanel();
   cerrarPanelDocente();
   mostrarBurbuja('✅ Avanzado al Día '+(diaActual+1));
+}
+
+function reiniciarDiaDocente(){
+  const sel = document.getElementById('dp-dia-reset-sel');
+  if(!sel || sel.value === '') {
+    alert('Selecciona primero un día para reiniciar.');
+    return;
+  }
+  const diaReset = parseInt(sel.value);
+  const diaNum = diaReset + 1;
+  if(!confirm('⚠️ ¿Reiniciar el Día '+diaNum+' de '+nombreAlumna+'?\n\nEsto borrará todas las secciones completadas de ese día.\nLa estudiante deberá completarlo nuevamente.\n\nEsta acción NO se puede deshacer.')) return;
+
+  // 1. Borrar secLogradas del día reiniciado
+  delete _secLogradasCache[diaReset];
+  localStorage.removeItem('sec_'+diaReset);
+
+  // 2. Si el día estaba completado, sacarlo de diasComp
+  diasComp.delete(diaReset);
+
+  // 3. Si diaActual era mayor al día reiniciado, retroceder
+  if(diaActual > diaReset){
+    diaActual = diaReset;
+  }
+
+  // 4. Restar puntos (10 por día completado + 5 por sección, aprox)
+  puntos = Math.max(0, puntos - 10);
+
+  // 5. Guardar y actualizar
+  guardar();
+  buildNav();
+  renderDia();
+  cargarDatosPanel();
+  cerrarPanelDocente();
+  mostrarBurbuja('🔄 Día '+diaNum+' reiniciado correctamente');
 }
 
 // La app espera el login. Si ya hay sesión en localStorage la restaura.
