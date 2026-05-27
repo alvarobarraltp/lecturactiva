@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_49.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_51.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,9 +82,23 @@ body{
 .nav-dias{background:white;padding:16px 18px;display:flex;gap:8px;overflow-x:auto;border-bottom:4px solid #c7d2fe;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.08);}
 .dia-btn{padding:12px 18px;border-radius:24px;border:3px solid #6b7280;background:white;cursor:pointer;font-size:16px;font-weight:800;transition:all .2s;color:#374151;min-height:48px;}
 .dia-btn.activo{background:#1e1b4b;color:white;border-color:#1e1b4b;box-shadow:0 4px 12px rgba(30,27,75,.3);}
-.dia-btn.completado{background:#065f46;color:white;border-color:#065f46;}
-.dia-btn.completado::after{content:" ✓";}
+.dia-btn.completado.activo{background:#10b981;color:white;border-color:#059669;box-shadow:0 4px 12px rgba(16,185,129,.5);}
+.dia-btn.completado{
+  background:#10b981;
+  color:white;
+  border-color:#059669;
+  border-width:3px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(16,185,129,.4);
+}
+.dia-btn.completado::after{content:" ✅";}
+.dia-btn.completado:hover{background:#059669;box-shadow:0 6px 16px rgba(16,185,129,.5);}
 .dia-btn:hover:not(.activo){border-color:#3730a3;color:#3730a3;background:#e0e7ff;}
+.dia-btn.completado:hover{
+  transform: scale(1.05);
+  background:#059669;
+  box-shadow:0 6px 16px rgba(16,185,129,.6);
+}
 
 /* CONTENIDO PRINCIPAL */
 .main{max-width:900px;margin:0 auto;padding:24px 18px;}
@@ -959,7 +973,8 @@ async function cargarNube(binId){
 
 async function guardarNube(){
   if(!binIdActual || modoInvitado) return;
-  // Usar cache en memoria (más confiable que localStorage)
+  _necesitaGuardar = false;
+  console.log('🌐 Guardando en nube para BIN:', binIdActual);
   const secLogradas = {};
   for(let i=0;i<20;i++){
     if(_secLogradasCache[i]) { secLogradas[i] = _secLogradasCache[i]; continue; }
@@ -974,25 +989,59 @@ async function guardarNube(){
     silabaStats
   };
   try{
-    await fetch(JSONBIN_BASE+'/'+binIdActual,{
+    console.log('📤 Enviando datos:', {nombre: datos.nombre, diaActual: datos.diaActual, puntos: datos.puntos, diasComp: datos.diasComp.length, secLogradas: Object.keys(datos.secLogradas).length});
+    const resp = await fetch(JSONBIN_BASE+'/'+binIdActual,{
       method:'PUT',
       headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY},
       body: JSON.stringify(datos)
     });
-  } catch(e){ console.warn('Error al guardar en nube',e); }
+    if(!resp.ok) {
+      console.error('❌ Error guardando en nube:', resp.status, resp.statusText);
+    } else {
+      console.log('✅ Datos guardados en nube exitosamente');
+    }
+  } catch(e){ console.error('❌ Error al guardar en nube:', e); }
 }
 
-let _guardarTimer = null;
+function guardarNubeSincronico(){
+  // Guardar de forma sincrónica antes de cerrar la página (último recurso)
+  if(!binIdActual || modoInvitado) return;
+  const secLogradas = {};
+  for(let i=0;i<20;i++){
+    if(_secLogradasCache[i]) { secLogradas[i] = _secLogradasCache[i]; continue; }
+    const v = localStorage.getItem('sec_'+i);
+    if(v) secLogradas[i] = JSON.parse(v);
+  }
+  const datos = {
+    nombre: nombreAlumna,
+    rut: (ALUMNAS_DB.find(a=>a.bin===binIdActual)||{}).rut || '',
+    puntos, diasComp:[...diasComp], diaActual, secLogradas,
+    obs: localStorage.getItem('obs_docente')||'',
+    silabaStats
+  };
+  try{
+    navigator.sendBeacon(JSONBIN_BASE+'/'+binIdActual, JSON.stringify({
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY},
+      body: JSON.stringify(datos)
+    }));
+  } catch(e){ console.warn('Error enviando beacon',e); }
+}
+
 function guardar(){
-  // Guardar en localStorage inmediatamente (rápido y sin red)
+  // Guardar en localStorage inmediatamente
   localStorage.setItem('dc',JSON.stringify([...diasComp]));
   localStorage.setItem('pts',puntos);
   localStorage.setItem('dia_actual', diaActual);
   if(binIdActual) localStorage.setItem('bin_sesion', binIdActual);
   if(nombreAlumna) localStorage.setItem('nombre_alumna', nombreAlumna);
-  // Guardar en nube con debounce de 1.5s para evitar múltiples llamadas
+  // Marcar para guardado en nube
+  _necesitaGuardar = true;
+  // Guardar en nube con debounce
   clearTimeout(_guardarTimer);
-  _guardarTimer = setTimeout(()=> guardarNube(), 1500);
+  _guardarTimer = setTimeout(()=> {
+    guardarNube();
+  }, 800); // Reducir a 800ms para respuesta más rápida
 }
 
 // ── Sistema de voces simplificado ──────────────────────────
@@ -2011,7 +2060,7 @@ function buildNav(){
     const comp=diasComp.has(i);
     const activo=i===diaActual;
     const bloqueado=!modoInvitado && i>diaActual;
-    b.className='dia-btn'+(activo?' activo':'')+(comp?' completado':'');
+    b.className='dia-btn'+(comp?' completado':'')+(activo?' activo':'');
     b.textContent='Día '+(i+1);
     if(bloqueado){
       b.style.opacity='0.35';
@@ -2073,18 +2122,23 @@ function renderDia(){
 // Orden obligatorio de secciones
 const ORDEN_SECS = ['silabas','palabradia','lectura','armar','dictado','escritura','discriminar','loteria','asociar'];
 
-function getSecLogradas(){
-  // Usar cache en memoria si está disponible
-  if(_secLogradasCache[diaActual]) return [..._secLogradasCache[diaActual]];
-  return JSON.parse(localStorage.getItem('sec_'+diaActual)||'[]');
+function getSecLogradas(dia = diaActual){
+  // Retornar secciones logradas para un día específico
+  if(_secLogradasCache[dia]) return [..._secLogradasCache[dia]];
+  const stored = localStorage.getItem('sec_'+dia);
+  return stored ? JSON.parse(stored) : [];
 }
 
-function setSecLograda(sec){
-  const logradas = getSecLogradas();
+function setSecLograda(sec, dia = diaActual){
+  // Guardar una sección como lograda para un día específico
+  const logradas = JSON.parse(localStorage.getItem('sec_'+dia)||'[]');
   if(!logradas.includes(sec)) logradas.push(sec);
-  localStorage.setItem('sec_'+diaActual, JSON.stringify(logradas));
+  localStorage.setItem('sec_'+dia, JSON.stringify(logradas));
   // También actualizar cache en memoria
-  _secLogradasCache[diaActual] = logradas;
+  _secLogradasCache[dia] = logradas;
+  // Marcar para guardado inmediato en nube
+  _necesitaGuardar = true;
+  console.log(`✅ Sección ${sec} guardada para Día ${dia+1}. Seclogradas:`, logradas);
 }
 
 function secDesbloqueada(sec){
@@ -2396,8 +2450,13 @@ function seccionCompletada(sec){
 
 function confirmarLogrado(sec, msgVoz){
   sonidoBien();
+  console.log(`🎯 Intentando confirmar sección ${sec}...`);
   // Validar que la sección esté realmente completada
-  if(!seccionCompletada(sec)) return;
+  if(!seccionCompletada(sec)) {
+    console.warn(`❌ Sección ${sec} no está completada`);
+    return;
+  }
+  console.log(`✅ Sección ${sec} está completada, guardando...`);
   const nom = nombreAlumna || '';
   // Actualizar estado
   setSecLograda(sec);
@@ -3050,11 +3109,15 @@ function construirMiProgreso(){
   const diaHoy = diaActual + 1;
 
   // ── Resumen general ──
+  const porcentaje = Math.round((diasCompletos / totalDias) * 100);
   const resumen = `
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
-      <div style="flex:1;min-width:100px;background:#ede9fe;border-radius:14px;padding:14px;text-align:center;">
-        <div style="font-size:32px;font-weight:900;color:#4f46e5">${diasCompletos}</div>
-        <div style="font-size:12px;font-weight:800;color:#6b7280">Días completados</div>
+      <div style="flex:1;min-width:100px;background:#d1fae5;border-radius:14px;padding:14px;text-align:center;border:3px solid #10b981;">
+        <div style="font-size:32px;font-weight:900;color:#059669">${diasCompletos}/${totalDias}</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">✅ Días completados (${porcentaje}%)</div>
+        <div style="background:white;border-radius:8px;margin-top:8px;height:8px;overflow:hidden;">
+          <div style="background:#10b981;height:100%;width:${porcentaje}%;transition:width .3s;"></div>
+        </div>
       </div>
       <div style="flex:1;min-width:100px;background:#d1fae5;border-radius:14px;padding:14px;text-align:center;">
         <div style="font-size:32px;font-weight:900;color:#059669">${puntos}</div>
@@ -3074,9 +3137,9 @@ function construirMiProgreso(){
     const comp = diasComp.has(i);
     const activo = i === diaActual;
     const bloq = i > diaActual;
-    let bg = '#f3f4f6', color='#9ca3af', borde='#e5e7eb', emoji='⬜';
-    if(comp){ bg='#d1fae5'; color='#059669'; borde='#059669'; emoji='✅'; }
-    else if(activo){ bg='#ede9fe'; color='#4f46e5'; borde='#4f46e5'; emoji='🔵'; }
+    let bg = '#f3f4f6', color='#9ca3af', borde='#e5e7eb', emoji='⬜', sombra='';
+    if(comp){ bg='#10b981'; color='white'; borde='#059669'; emoji='✅'; sombra='box-shadow:0 2px 8px rgba(16,185,129,.4);'; }
+    else if(activo){ bg='#ede9fe'; color='#4f46e5'; borde='#4f46e5'; emoji='🔵'; sombra='box-shadow:0 2px 8px rgba(79,70,229,.3);'; }
     else if(bloq){ emoji='🔒'; }
     mapaDias += `<div style="width:52px;height:52px;border-radius:10px;border:2px solid ${borde};background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:${color};">
       <span style="font-size:16px">${emoji}</span>
