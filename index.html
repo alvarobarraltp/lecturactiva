@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_51.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_52.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3087,7 +3087,22 @@ function verificarArmar(palabra,silStr,idx){
   if(ok){
     sonidoBien();if(fb){fb.className='feedback ok';fb.textContent='¡Muy bien! ⭐ La palabra es: '+palabra;}
     puntos+=5;guardar();const pts=document.getElementById('pts');if(pts)pts.textContent='⭐ '+puntos;
-    armarIdx++;setTimeout(()=>{const c=document.getElementById('armar-contenido');if(c)c.innerHTML=renderArmarEj(null,armarIdx);},1600);
+    armarIdx++;
+    const d=DIAS[diaActual];
+    // Verificar si hay más ejercicios después de este
+    setTimeout(()=>{
+      const c=document.getElementById('armar-contenido');
+      if(c){
+        if(armarIdx < d.ejercicios.length){
+          // Hay más ejercicios, renderizar siguiente
+          c.innerHTML=renderArmarEj(null,armarIdx);
+        } else {
+          // Se completaron todos los ejercicios
+          c.innerHTML=renderArmarEj(null,armarIdx);
+          // El renderArmarEj(null, armarIdx) cuando armarIdx >= ejercicios.length muestra mensaje de completado
+        }
+      }
+    },1600);
   } else {
     if(fb){fb.className='feedback error';fb.textContent='¡Casi! Escucha y vuelve a intentarlo.';}
     armarFormada=[];const zona=document.getElementById('armar-zona');if(zona)zona.innerHTML='<span style="color:#9ca3af;font-size:14px">Toca las sílabas...</span>';
