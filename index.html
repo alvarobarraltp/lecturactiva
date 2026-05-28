@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_62.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_65.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -895,10 +895,17 @@ let velocidad = 0.45;
 let palabraFormada = [];
 let nombreAlumna = '';
 let binIdActual = '';
-let _secLogradasCache = {}; // Cache en memoria de secLogradas
+let _secLogradasCache = {};
 let modoInvitado = false;
 const CLAVE_INVITADO = 'invitado';
-let silabaStats = {}; // {sil: {vistas, intentos, aciertos}}
+let silabaStats = {};
+let _silActiva = 0;
+const _silToques = {};
+let armarFormada = [], armarIdx = 0;
+let lotSilabaActual = '', lotPuntosRonda = 0, lotRespuestaVisible = false;
+let discPreguntas = [], discIdx = 0, discPuntos = 0;
+let _asocPalabras = [], _asocIzqSel = null, _asocEmparejadas = new Set();
+let alumnasDatos = [];
 function regSil(sil,tipo,ok){
   if(!silabaStats[sil]) silabaStats[sil]={vistas:0,intentos:0,aciertos:0};
   if(tipo==='vista') silabaStats[sil].vistas++;
@@ -1796,7 +1803,6 @@ document.addEventListener('click', function(e){
 });
 
 // ── Panel docente completo ──────────────────────────────────
-let alumnasDatos = [];
 
 function abrirLoginDocente(){
   document.getElementById('modal-clave-docente').style.display='flex';
@@ -2172,11 +2178,6 @@ function renderDia(){
   lotPuntosRonda = 0;
   lotRespuestaVisible = false;
   
-  // Reiniciar variables de discriminación
-  discPreguntas=[];
-  discIdx=0;
-  discPuntos=0;
-  
   const d=DIAS[diaActual];
   const c=document.getElementById('contenidoDia');
   c.innerHTML=`
@@ -2347,8 +2348,6 @@ function htmlSilabas(d){
 }
 
 // Sílabas: índice activo y contadores de toques
-let _silActiva = 0;
-const _silToques = {};
 
 function playSil(sil, idx){
   const el = document.getElementById('sil_'+idx);
@@ -2581,10 +2580,6 @@ function confirmarLogrado(sec, msgVoz){
 
 function marcarLeccionLograda(){
   confirmarLogrado('lectura','¡Muy bien! Lectura lograda.');
-}
-
-function marcarLeccionLograda(){
-  confirmarLogrado('lectura','Muy bien, lectura lograda');
 }
 
 function normalizarTexto(t){
@@ -2857,9 +2852,6 @@ function verificar(palabra,silStr,idx){
 }
 
 // ── Estado del juego de lotería ────────────────────────────
-let lotSilabaActual = '';
-let lotPuntosRonda = 0;
-let lotRespuestaVisible = false;
 
 function htmlLoteria(d){
   return`<div class="card">
@@ -3014,14 +3006,13 @@ function lotReset(){
 function htmlPalabraDelDia(){
   const pd=PALABRAS_DEL_DIA[diaActual];
   if(!pd) return '<div class="card"><p>Sin palabra del día.</p></div>';
-  // Guardar datos en window para usarlos desde onclick sin riesgo de comillas
   window._pd = pd;
   let silsHtml='';
   pd.silabas.forEach(function(s,si){
     window['_pdSil'+si]=s;
-    silsHtml+='<span class="pdial-sil" onclick="hablar(window._pdSil'+si+',velocidad);regSil(window._pdSil'+si+",\'vista\',true);sessionStorage.setItem(\'pd_tocada_\'+diaActual,\'1\')">"
-      +s+'</span>';
-    if(si < pd.silabas.length-1) silsHtml+='<span style="color:#9ca3af;font-size:22px;margin:0 6px">+</span>';
+    const oc="hablar(window['_pdSil"+si+"'],velocidad);regSil(window['_pdSil"+si+"'],'vista',true);sessionStorage.setItem('pd_tocada_'+diaActual,'1')";
+    silsHtml+='<span class="pdial-sil" onclick="'+oc+'">'+s+'</span>';
+    if(si<pd.silabas.length-1) silsHtml+='<span style="color:#9ca3af;font-size:22px;margin:0 6px">+</span>';
   });
   const log=getSecLogradas().includes('palabradia');
   return '<div class="card">'
@@ -3041,7 +3032,6 @@ function htmlPalabraDelDia(){
 }
 
 // ── Discriminación ──────────────────────────────────────
-let discPreguntas=[],discIdx=0,discPuntos=0;
 function generarPreguntasDisc(d){
   const sils=d.silabas;
   return [...sils].sort(()=>Math.random()-.5).slice(0,Math.min(5,sils.length)).map(silObj=>{
@@ -3107,7 +3097,6 @@ function verificarDisc(elegida,correcta){
 }
 
 // ── Armar Palabra ───────────────────────────────────────
-let armarFormada=[],armarIdx=0;
 function htmlArmarPalabra(d){
   armarIdx=0;armarFormada=[];
   const log=getSecLogradas().includes('armar');
