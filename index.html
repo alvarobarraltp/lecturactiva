@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_53.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_58.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -376,7 +376,7 @@ body{
     <h1>Lectura Activa</h1>
     <p>Método de los 20 Días &nbsp;|&nbsp; Liceo Técnico Profesional Río Bueno</p>
     <p style="font-size:16px;opacity:.7;margin-top:2px">Creador: Álvaro Barra Sáez</p>
-    <p class="header-nombre" id="header-nombre" style="display:none">✨ <span id="header-nombre-txt"></span></p>
+    <p class="header-nombre" id="header-nombre" style="display: block;">✨ <span id="header-nombre-txt">Anahís</span></p>
     <div id="banner-invitado" style="display:none;background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.5);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;color:#fef3c7;margin-top:4px;">👁 MODO INVITADO — el progreso no se guarda</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
@@ -384,8 +384,575 @@ body{
     <button onclick="abrirPanelDocente()" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);color:white;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;" title="Panel Creador">🔐 Creador</button>
   </div>
 </div>
-<div class="nav-dias" id="navDias"></div>
-<div class="main" id="contenidoDia"></div>
+<div class="nav-dias" id="navDias"><button class="dia-btn completado">Día 1</button><button class="dia-btn completado">Día 2</button><button class="dia-btn completado">Día 3</button><button class="dia-btn completado">Día 4</button><button class="dia-btn completado">Día 5</button><button class="dia-btn completado">Día 6</button><button class="dia-btn completado">Día 7</button><button class="dia-btn completado">Día 8</button><button class="dia-btn completado">Día 9</button><button class="dia-btn">Día 10</button><button class="dia-btn">Día 11</button><button class="dia-btn">Día 12</button><button class="dia-btn">Día 13</button><button class="dia-btn">Día 14</button><button class="dia-btn">Día 15</button><button class="dia-btn">Día 16</button><button class="dia-btn activo">Día 17</button><button class="dia-btn" title="Esperando habilitación del docente" style="opacity: 0.35; cursor: not-allowed;">Día 18</button><button class="dia-btn" title="Esperando habilitación del docente" style="opacity: 0.35; cursor: not-allowed;">Día 19</button><button class="dia-btn" title="Esperando habilitación del docente" style="opacity: 0.35; cursor: not-allowed;">Día 20</button></div>
+<div class="main" id="contenidoDia">
+    <div class="semana-badge" style="background:#7c3aed22;color:#7c3aed">Semana 5 — Vocal U</div>
+    <div class="titulo-dia">La vocal U</div>
+    <div class="subtitulo-dia">Conocemos la U y sus sílabas</div>
+    <div class="puntaje"><div class="puntaje-wrap"><span class="puntaje-num" id="pts">⭐ 2150</span><span class="puntaje-label">puntos totales</span></div></div>
+    <div class="tab-nav">
+      <button class="tab-btn activo" id="tab-btn-silabas" onclick="cambiarSec(&#39;silabas&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">🔤</div>Sílabas<span class="tab-check"> ✅</span></button>
+      <button class="tab-btn" id="tab-btn-palabradia" onclick="cambiarSec(&#39;palabradia&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">⭐</div>Palabra<span class="tab-check"> ✅</span></button>
+      <button class="tab-btn" id="tab-btn-lectura" onclick="cambiarSec(&#39;lectura&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">📖</div>Lectura<span class="tab-check"> ✅</span></button>
+      <button class="tab-btn" id="tab-btn-armar" onclick="cambiarSec(&#39;armar&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">✏️</div>Armar<span class="tab-check"> ✅</span></button>
+      <button class="tab-btn" id="tab-btn-dictado" onclick="cambiarSec(&#39;dictado&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">📝</div>Dictado<span class="tab-check"> ✅</span></button>
+      <button class="tab-btn" id="tab-btn-escritura" onclick="cambiarSec(&#39;escritura&#39;,this)" style="opacity: 1; cursor: pointer;"><div style="font-size:26px;margin-bottom:4px">✍️</div>Escritura<span class="tab-check"></span></button>
+      <button class="tab-btn" id="tab-btn-discriminar" onclick="cambiarSec(&#39;discriminar&#39;,this)" disabled="" style="opacity: 0.45; cursor: not-allowed;"><div style="font-size:26px;margin-bottom:4px">🔍</div>Discriminar<span class="tab-check"> 🔒</span></button>
+      <button class="tab-btn" id="tab-btn-loteria" onclick="cambiarSec(&#39;loteria&#39;,this)" disabled="" style="opacity: 0.45; cursor: not-allowed;"><div style="font-size:26px;margin-bottom:4px">🎲</div>Lotería<span class="tab-check"> 🔒</span></button>
+      <button class="tab-btn" id="tab-btn-asociar" onclick="cambiarSec(&#39;asociar&#39;,this);renderAsociar()" disabled="" style="opacity: 0.45; cursor: not-allowed;"><div style="font-size:26px;margin-bottom:4px">🔗</div>Asociar<span class="tab-check"> 🔒</span></button>
+      <button class="tab-btn" id="tab-btn-miprogreso" onclick="cambiarSec(&#39;miprogreso&#39;,this);renderMiProgreso()"><div style="font-size:26px;margin-bottom:4px">🏆</div>Mi Progreso</button>
+      <button class="tab-btn" onclick="cambiarSec(&#39;reporte&#39;,this);renderReporte()"><div style="font-size:26px;margin-bottom:4px">📊</div>Reporte</button>
+    </div>
+    <div id="sec-silabas" class="seccion activa"><div class="card">
+    <div class="card-title">🔊 Toca cada sílaba para escucharla</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn sel" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">Mónica</span></div>
+  </div>
+    <div class="speed-ctrl">
+      <span class="speed-label">Velocidad:</span>
+      <button class="speed-btn sel" onclick="setVel(0.35,this)">🐢 Muy lenta</button>
+      <button class="speed-btn" onclick="setVel(0.45,this)">🐌 Lenta</button>
+      <button class="speed-btn" onclick="setVel(0.85,this)">🐇 Normal</button>
+    </div>
+    <div class="silaba-grid"><div class="sil " id="sil_0" onclick="playSil(&#39;bu&#39;,0)">
+      <span class="emoji">🦉</span>
+      <span class="txt">bu</span>
+      <span class="pal">búho</span>
+      <div class="sil-puntos" id="silpts_0">⚪⚪⚪</div>
+    </div><div class="sil bloqueada" id="sil_1" onclick="playSil(&#39;chu&#39;,1)">
+      <span class="emoji">🍼</span>
+      <span class="txt">chu</span>
+      <span class="pal">chupete</span>
+      <div class="sil-puntos" id="silpts_1"></div>
+    </div><div class="sil bloqueada" id="sil_2" onclick="playSil(&#39;cu&#39;,2)">
+      <span class="emoji">🗡</span>
+      <span class="txt">cu</span>
+      <span class="pal">cuchillo</span>
+      <div class="sil-puntos" id="silpts_2"></div>
+    </div><div class="sil bloqueada" id="sil_3" onclick="playSil(&#39;du&#39;,3)">
+      <span class="emoji">🍬</span>
+      <span class="txt">du</span>
+      <span class="pal">dulce</span>
+      <div class="sil-puntos" id="silpts_3"></div>
+    </div><div class="sil bloqueada" id="sil_4" onclick="playSil(&#39;fu&#39;,4)">
+      <span class="emoji">🔥</span>
+      <span class="txt">fu</span>
+      <span class="pal">fuego</span>
+      <div class="sil-puntos" id="silpts_4"></div>
+    </div><div class="sil bloqueada" id="sil_5" onclick="playSil(&#39;gu&#39;,5)">
+      <span class="emoji">🧤</span>
+      <span class="txt">gu</span>
+      <span class="pal">guante</span>
+      <div class="sil-puntos" id="silpts_5"></div>
+    </div><div class="sil bloqueada" id="sil_6" onclick="playSil(&#39;hu&#39;,6)">
+      <span class="emoji">🦴</span>
+      <span class="txt">hu</span>
+      <span class="pal">hueso</span>
+      <div class="sil-puntos" id="silpts_6"></div>
+    </div><div class="sil bloqueada" id="sil_7" onclick="playSil(&#39;ju&#39;,7)">
+      <span class="emoji">🧸</span>
+      <span class="txt">ju</span>
+      <span class="pal">juguete</span>
+      <div class="sil-puntos" id="silpts_7"></div>
+    </div><div class="sil bloqueada" id="sil_8" onclick="playSil(&#39;llu&#39;,8)">
+      <span class="emoji">🌧</span>
+      <span class="txt">llu</span>
+      <span class="pal">lluvia</span>
+      <div class="sil-puntos" id="silpts_8"></div>
+    </div><div class="sil bloqueada" id="sil_9" onclick="playSil(&#39;mu&#39;,9)">
+      <span class="emoji">🎵</span>
+      <span class="txt">mu</span>
+      <span class="pal">música</span>
+      <div class="sil-puntos" id="silpts_9"></div>
+    </div><div class="sil bloqueada" id="sil_10" onclick="playSil(&#39;pu&#39;,10)">
+      <span class="emoji">🐙</span>
+      <span class="txt">pu</span>
+      <span class="pal">pulpo</span>
+      <div class="sil-puntos" id="silpts_10"></div>
+    </div><div class="sil bloqueada" id="sil_11" onclick="playSil(&#39;ru&#39;,11)">
+      <span class="emoji">🛞</span>
+      <span class="txt">ru</span>
+      <span class="pal">rueda</span>
+      <div class="sil-puntos" id="silpts_11"></div>
+    </div><div class="sil bloqueada" id="sil_12" onclick="playSil(&#39;su&#39;,12)">
+      <span class="emoji">🧥</span>
+      <span class="txt">su</span>
+      <span class="pal">sudadera</span>
+      <div class="sil-puntos" id="silpts_12"></div>
+    </div><div class="sil bloqueada" id="sil_13" onclick="playSil(&#39;tu&#39;,13)">
+      <span class="emoji">🌷</span>
+      <span class="txt">tu</span>
+      <span class="pal">tulipán</span>
+      <div class="sil-puntos" id="silpts_13"></div>
+    </div><div class="sil bloqueada" id="sil_14" onclick="playSil(&#39;vu&#39;,14)">
+      <span class="emoji">🕊</span>
+      <span class="txt">vu</span>
+      <span class="pal">vuelo</span>
+      <div class="sil-puntos" id="silpts_14"></div>
+    </div><div class="sil bloqueada" id="sil_15" onclick="playSil(&#39;zu&#39;,15)">
+      <span class="emoji">🧃</span>
+      <span class="txt">zu</span>
+      <span class="pal">zumo</span>
+      <div class="sil-puntos" id="silpts_15"></div>
+    </div></div>
+    <div class="sec-logrado-wrap">
+      <p class="sec-instruccion">Toca la sílaba activa <strong>3 veces</strong> y repítela en voz alta.</p>
+      <button class="btn-sec-logrado hecho" id="btn-logrado-silabas" onclick="confirmarLogrado(&#39;silabas&#39;,&#39;¡Muy bien! Practicaste todas las sílabas.&#39;)">
+        ✅ ¡Sílabas logradas!
+      </button>
+    </div>
+  </div></div>
+    <div id="sec-palabradia" class="seccion"><div class="card">
+    <div class="card-title">⭐ Palabra del Día</div>
+    <div class="pdial-card">
+      <span class="pdial-imagen">🌙</span>
+      <div class="pdial-palabra">LUNA</div>
+      <p class="pdial-contexto">"La luna brilla en el cielo del sur."</p>
+      <p style="font-size:16px;color:#6b7280;margin-bottom:8px">Toca cada sílaba para escucharla:</p>
+      <div class="pdial-silabas"><span class="pdial-sil" onclick="hablar(&#39;LU&#39;,velocidad);regSil(&#39;LU&#39;,&#39;vista&#39;,true);sessionStorage.setItem(&#39;pd_tocada_&#39;+diaActual,&#39;1&#39;)">LU</span><span style="color:#9ca3af;font-size:22px;margin:0 6px">+</span><span class="pdial-sil" onclick="hablar(&#39;NA&#39;,velocidad);regSil(&#39;NA&#39;,&#39;vista&#39;,true);sessionStorage.setItem(&#39;pd_tocada_&#39;+diaActual,&#39;1&#39;)">NA</span></div>
+    </div>
+    <button class="btn-verificar" onclick="hablar(&#39;LUNA&#39;,velocidad)">🔊 Escuchar palabra completa</button>
+    <div class="sec-logrado-wrap" style="margin-top:14px">
+      <button class="btn-sec-logrado hecho" onclick="confirmarLogrado(&#39;palabradia&#39;,&#39;¡Muy bien! Trabajaste la palabra del día.&#39;)">
+        ✅ ¡Logrado!
+      </button>
+    </div>
+  </div></div>
+    <div id="sec-lectura" class="seccion"><div class="card">
+    <div class="imagen-lectura">🌙</div>
+    <div class="card-title">📖 Toca cada palabra para escucharla</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <div class="texto-lectura"><span class="palabra-lectura" onclick="hablar(&#39;La&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">La</span> <span class="palabra-lectura" onclick="hablar(&#39;luna&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">luna</span> <span class="palabra-lectura" onclick="hablar(&#39;sale&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">sale</span> <span class="palabra-lectura" onclick="hablar(&#39;sobre&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">sobre</span> <span class="palabra-lectura" onclick="hablar(&#39;el&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">el</span> <span class="palabra-lectura" onclick="hablar(&#39;sur&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">sur</span> <span class="palabra-lectura" onclick="hablar(&#39;del&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">del</span> <span class="palabra-lectura" onclick="hablar(&#39;río&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">río</span> <span class="palabra-lectura" onclick="hablar(&#39;Bueno&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">Bueno.</span><br><span class="palabra-lectura" onclick="hablar(&#39;La&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">La</span> <span class="palabra-lectura" onclick="hablar(&#39;nube&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">nube</span> <span class="palabra-lectura" onclick="hablar(&#39;tapa&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">tapa</span> <span class="palabra-lectura" onclick="hablar(&#39;el&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">el</span> <span class="palabra-lectura" onclick="hablar(&#39;sol&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">sol</span> <span class="palabra-lectura" onclick="hablar(&#39;del&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">del</span> <span class="palabra-lectura" onclick="hablar(&#39;sur&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">sur.</span><br><span class="palabra-lectura" onclick="hablar(&#39;El&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">El</span> <span class="palabra-lectura" onclick="hablar(&#39;puma&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">puma</span> <span class="palabra-lectura" onclick="hablar(&#39;corre&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">corre</span> <span class="palabra-lectura" onclick="hablar(&#39;por&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">por</span> <span class="palabra-lectura" onclick="hablar(&#39;la&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">la</span> <span class="palabra-lectura" onclick="hablar(&#39;ruta&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">ruta</span> <span class="palabra-lectura" onclick="hablar(&#39;con&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">con</span> <span class="palabra-lectura" onclick="hablar(&#39;su&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">su</span> <span class="palabra-lectura" onclick="hablar(&#39;lupa&#39;,velocidad);sessionStorage.setItem(&#39;lec_tocadas_&#39;+diaActual,parseInt(sessionStorage.getItem(&#39;lec_tocadas_&#39;+diaActual)||&#39;0&#39;)+1)">lupa.</span></div>
+    <br>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;">
+      <button class="btn-verificar" onclick="hablar(&#39;La luna sale sobre el sur del río Bueno.
+La nube tapa el sol del sur.
+El puma corre por la ruta con su lupa.&#39;,velocidad)">🔊 Escuchar todo</button>
+      <button id="btn-logrado-lec" class="btn-sec-logrado" onclick="confirmarLogrado(&#39;lectura&#39;,&#39;¡Muy bien! Completaste la lectura.&#39;)">
+        🏅 ¡Logré la lectura!
+      </button>
+    </div>
+    
+  </div></div>
+    <div id="sec-armar" class="seccion"><div class="card">
+    <div class="card-title">✏️ Armar Palabras</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">Escucha la palabra y selecciona las sílabas en orden correcto.</p>
+    <div id="armar-contenido"><div><div class="progreso-bar-wrap"><div class="progreso-bar" style="width:0%"></div></div><p style="font-size:16px;color:#6b7280;margin-bottom:8px">Ejercicio 1 de 3</p><div style="background:#e0e7ff;border:4px solid #3730a3;border-radius:20px;padding:20px;text-align:center;margin-bottom:18px;"><p style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:14px;">Forma la palabra: <span style="font-size:32px;color:#3730a3;letter-spacing:3px;">LUNA</span></p><button onclick="hablar(&#39;Forma la palabra luna&#39;,velocidad)" style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">🔊 Escuchar instrucción</button></div><p class="armar-pista">Toca las sílabas en el orden correcto 👇</p><div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"><button class="armar-sil-opcion" id="armar_0_mu" onclick="agregarArmar(&#39;mu&#39;,this)">mu</button><button class="armar-sil-opcion" id="armar_1_na" onclick="agregarArmar(&#39;na&#39;,this)">na</button><button class="armar-sil-opcion" id="armar_2_su" onclick="agregarArmar(&#39;su&#39;,this)">su</button><button class="armar-sil-opcion" id="armar_3_lu" onclick="agregarArmar(&#39;lu&#39;,this)">lu</button></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn-verificar" onclick="verificarArmar(&#39;luna&#39;,&#39;lu-na&#39;,0)">✅ Verificar</button><button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar</button><button class="speed-btn" onclick="armarFormada=[];var z=document.getElementById(&#39;armar-zona&#39;);if(z)z.innerHTML=&#39;Toca las sílabas...&#39;;document.querySelectorAll(&#39;.armar-sil-opcion&#39;).forEach(function(b){b.disabled=false})">🗑 Borrar</button></div><div id="armar-fb" class="feedback"></div></div></div>
+    <div class="sec-logrado-wrap" style="margin-top:14px">
+      <button class="btn-sec-logrado hecho" onclick="confirmarLogrado(&#39;armar&#39;,&#39;¡Fantástico! Armaste todas las palabras.&#39;)">
+        ✅ ¡Logrado!
+      </button>
+    </div>
+  </div></div>
+    <div id="sec-dictado" class="seccion"><div class="card">
+    <div class="card-title">✏️ Dictado — escucha y escribe aquí</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">
+      🔊 Aprieta el botón para escuchar, luego escribe y aprieta <strong>Verificar</strong>.
+    </p>
+    <div class="dict-progreso"><div class="dict-prog-dot" id="dprog_0">1</div><div class="dict-prog-dot" id="dprog_1">2</div><div class="dict-prog-dot" id="dprog_2">3</div><div class="dict-prog-dot" id="dprog_3">4</div><div class="dict-prog-dot" id="dprog_4">5</div><div class="dict-prog-dot" id="dprog_5">6</div><div class="dict-prog-dot" id="dprog_6">7</div><div class="dict-prog-dot" id="dprog_7">8</div></div>
+    
+    <div class="dict-item" id="ditem_0">
+      <div class="dict-num">Palabra 1</div>
+      <button class="dict-btn-escuchar" id="dbtn_0" onclick="escucharPalabra(0,&#39;luna&#39;)">
+        🔊 Escuchar palabra 1
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_0" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(0,&#39;luna&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(0,&#39;luna&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;luna&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;luna&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_0"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_0"></div>
+    </div>
+    <div class="dict-item" id="ditem_1">
+      <div class="dict-num">Palabra 2</div>
+      <button class="dict-btn-escuchar" id="dbtn_1" onclick="escucharPalabra(1,&#39;nube&#39;)">
+        🔊 Escuchar palabra 2
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_1" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(1,&#39;nube&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(1,&#39;nube&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;nube&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;nube&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_1"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_1"></div>
+    </div>
+    <div class="dict-item" id="ditem_2">
+      <div class="dict-num">Palabra 3</div>
+      <button class="dict-btn-escuchar" id="dbtn_2" onclick="escucharPalabra(2,&#39;mula&#39;)">
+        🔊 Escuchar palabra 3
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_2" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(2,&#39;mula&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(2,&#39;mula&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;mula&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;mula&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_2"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_2"></div>
+    </div>
+    <div class="dict-item" id="ditem_3">
+      <div class="dict-num">Palabra 4</div>
+      <button class="dict-btn-escuchar" id="dbtn_3" onclick="escucharPalabra(3,&#39;puma&#39;)">
+        🔊 Escuchar palabra 4
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_3" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(3,&#39;puma&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(3,&#39;puma&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;puma&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;puma&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_3"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_3"></div>
+    </div>
+    <div class="dict-item" id="ditem_4">
+      <div class="dict-num">Palabra 5</div>
+      <button class="dict-btn-escuchar" id="dbtn_4" onclick="escucharPalabra(4,&#39;suma&#39;)">
+        🔊 Escuchar palabra 5
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_4" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(4,&#39;suma&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(4,&#39;suma&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;suma&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;suma&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_4"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_4"></div>
+    </div>
+    <div class="dict-item" id="ditem_5">
+      <div class="dict-num">Palabra 6</div>
+      <button class="dict-btn-escuchar" id="dbtn_5" onclick="escucharPalabra(5,&#39;sube&#39;)">
+        🔊 Escuchar palabra 6
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_5" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(5,&#39;sube&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(5,&#39;sube&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;sube&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;sube&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_5"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_5"></div>
+    </div>
+    <div class="dict-item" id="ditem_6">
+      <div class="dict-num">Palabra 7</div>
+      <button class="dict-btn-escuchar" id="dbtn_6" onclick="escucharPalabra(6,&#39;ruta&#39;)">
+        🔊 Escuchar palabra 7
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_6" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(6,&#39;ruta&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(6,&#39;ruta&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;ruta&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;ruta&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_6"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_6"></div>
+    </div>
+    <div class="dict-item" id="ditem_7">
+      <div class="dict-num">Palabra 8</div>
+      <button class="dict-btn-escuchar" id="dbtn_7" onclick="escucharPalabra(7,&#39;lupa&#39;)">
+        🔊 Escuchar palabra 8
+      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="dict-input" id="dinp_7" type="text" placeholder="Escribe aquí lo que escuchaste..." onkeydown="if(event.key===&#39;Enter&#39;)verificarPalabra(7,&#39;lupa&#39;)" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="dict-acciones">
+        <button class="dict-btn-check" onclick="verificarPalabra(7,&#39;lupa&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;lupa&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;lupa&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="dres_7"></div>
+      <div class="dict-respuesta-correcta" id="dcorr_7"></div>
+    </div>
+    <div class="dict-resumen" id="dict-resumen">
+      <h3></h3>
+      <p>¡Completaste todo el dictado del día!</p>
+    </div>
+    <div class="sec-logrado-wrap" style="margin-top:16px">
+      <button class="btn-sec-logrado" id="btn-logrado-dictado" onclick="confirmarLogrado(&#39;dictado&#39;,&#39;¡Excelente! Completaste el dictado.&#39;)">🏅 ¡Logré el dictado!</button>
+    </div>
+  </div></div>
+    <div id="sec-escritura" class="seccion"><div class="card">
+    <div class="card-title">🗣 Escritura de Frases</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <p style="font-size:18px;color:#374151;margin-bottom:18px;font-weight:700;">
+      Escucha cada frase completa y escríbela en el cuadro.
+    </p>
+    
+    <div class="escrit-item" id="eitem_0">
+      <div class="dict-num">Frase 1 de 3</div>
+      <button class="dict-btn-escuchar" onclick="hablar(&#39;La luna sale en la noche.&#39;,velocidad)">
+        🔊 Escuchar frase 1
+      </button>
+      <textarea class="escrit-input" id="einp_0" placeholder="Escribe aquí la frase completa..." autocomplete="off" autocorrect="off" spellcheck="false" rows="3"></textarea>
+      <div class="dict-acciones" style="margin-top:10px;">
+        <button class="dict-btn-check" onclick="verificarFraseEscritura(0,&#39;La luna sale en la noche.&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;La luna sale en la noche.&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;La luna sale en la noche.&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="eres_0"></div>
+    </div>
+    <div class="escrit-item" id="eitem_1">
+      <div class="dict-num">Frase 2 de 3</div>
+      <button class="dict-btn-escuchar" onclick="hablar(&#39;La nube tapa el sol.&#39;,velocidad)">
+        🔊 Escuchar frase 2
+      </button>
+      <textarea class="escrit-input" id="einp_1" placeholder="Escribe aquí la frase completa..." autocomplete="off" autocorrect="off" spellcheck="false" rows="3"></textarea>
+      <div class="dict-acciones" style="margin-top:10px;">
+        <button class="dict-btn-check" onclick="verificarFraseEscritura(1,&#39;La nube tapa el sol.&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;La nube tapa el sol.&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;La nube tapa el sol.&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="eres_1"></div>
+    </div>
+    <div class="escrit-item" id="eitem_2">
+      <div class="dict-num">Frase 3 de 3</div>
+      <button class="dict-btn-escuchar" onclick="hablar(&#39;El puma corre por la ruta.&#39;,velocidad)">
+        🔊 Escuchar frase 3
+      </button>
+      <textarea class="escrit-input" id="einp_2" placeholder="Escribe aquí la frase completa..." autocomplete="off" autocorrect="off" spellcheck="false" rows="3"></textarea>
+      <div class="dict-acciones" style="margin-top:10px;">
+        <button class="dict-btn-check" onclick="verificarFraseEscritura(2,&#39;El puma corre por la ruta.&#39;)">✅ Verificar</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;El puma corre por la ruta.&#39;,velocidad)">🔁 Repetir</button>
+        <button class="dict-btn-repetir" onclick="hablar(&#39;El puma corre por la ruta.&#39;,velocidad*0.7)">🐢 Más lento</button>
+      </div>
+      <div class="dict-resultado" id="eres_2"></div>
+    </div>
+    <div class="sec-logrado-wrap" style="margin-top:16px">
+      <button class="btn-sec-logrado" onclick="confirmarLogrado(&#39;escritura&#39;,&#39;¡Muy bien! Completaste la escritura de frases.&#39;)">
+        🏅 ¡Logré la escritura!
+      </button>
+    </div>
+  </div></div>
+    <div id="sec-discriminar" class="seccion"><div class="card">
+    <div class="card-title">🔍 Discriminación de Sílabas</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">Escucha y elige la sílaba correcta. ¡Demuestra lo que aprendiste!</p>
+    <div id="disc-contenido"><div>
+    <div class="disc-progreso"><div class="disc-prog-dot activo">1</div><div class="disc-prog-dot">2</div><div class="disc-prog-dot">3</div><div class="disc-prog-dot">4</div><div class="disc-prog-dot">5</div></div>
+    <div class="disc-pregunta">🛞 ¿Cuál sílaba escuchaste?<br>
+      <span style="font-size:16px;color:#6b7280;font-weight:700">Pista: inicia la palabra "rueda"</span>
+    </div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <button onclick="hablar(discPreguntas[discIdx]?.correcta,velocidad)" style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">
+        🔊 Escuchar de nuevo
+      </button>
+    </div>
+    <div class="disc-opciones"><button class="disc-btn" onclick="verificarDisc(&#39;cu&#39;,&#39;ru&#39;)">cu</button><button class="disc-btn" onclick="verificarDisc(&#39;du&#39;,&#39;ru&#39;)">du</button><button class="disc-btn" onclick="verificarDisc(&#39;ru&#39;,&#39;ru&#39;)">ru</button><button class="disc-btn" onclick="verificarDisc(&#39;ju&#39;,&#39;ru&#39;)">ju</button></div>
+    <div class="disc-resultado" id="disc-res"></div>
+  </div></div>
+    <div class="sec-logrado-wrap" style="margin-top:16px">
+      <button class="btn-sec-logrado" onclick="confirmarLogrado(&#39;discriminar&#39;,&#39;¡Excelente! Discriminaste correctamente las sílabas.&#39;)">
+        🏅 ¡Logré discriminar!
+      </button>
+    </div>
+  </div></div>
+    <div id="sec-loteria" class="seccion"><div class="card">
+    <div class="card-title">🎲 Juego de Sílabas</div>
+    <div class="voz-panel">
+    <h3>🎙 Voz</h3>
+    <div class="voz-grid">
+      <button class="voz-btn" id="vbtn_paulina" onclick="seleccionarVoz(&#39;paulina&#39;)">👩 Paulina</button>
+      <button class="voz-btn" id="vbtn_nino" onclick="seleccionarVoz(&#39;nino&#39;)">👦 Niño</button>
+    </div>
+    <div class="voz-nombre-wrap">Voz activa: <span id="voz-nombre">cargando...</span></div>
+  </div>
+    <p style="font-size:16px;color:#6b7280;margin-bottom:14px">
+      Sale una sílaba al azar. ¡Elige otra sílaba para formar una palabra!
+    </p>
+
+    <div class="lot-sorteada" id="lot-sorteada">
+      <div class="lot-etiqueta">Sílaba sorteada:</div>
+      <div class="lot-sil-grande" id="lot-sil-txt">— — —</div>
+      <button class="lot-escuchar-btn" id="lot-escuchar-btn" onclick="lotEscuchar()" style="display:none">🔊 Escuchar</button>
+    </div>
+
+    <div id="lot-opciones" style="margin:14px 0;display:none"></div>
+    <div id="lot-resultado" class="lot-resultado" style="display:none"></div>
+    <div id="lot-respuesta" class="lot-respuesta-txt" style="display:none"></div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+      <button class="btn-sortear" onclick="lotSortear()">🎲 Nueva sílaba</button>
+      <button class="speed-btn" onclick="lotReset()">🔄 Reiniciar</button>
+    </div>
+    <div class="lot-puntaje" id="lot-puntaje">Aciertos: <strong>0</strong></div>
+    <div class="sec-logrado-wrap" style="margin-top:14px">
+      <button class="btn-sec-logrado" onclick="confirmarLogrado(&#39;loteria&#39;,&#39;¡Genial! Terminaste el juego de sílabas.&#39;)">🏅 ¡Logré la lotería!</button>
+    </div>
+  </div></div>
+    <div id="sec-asociar" class="seccion"></div>
+    <div id="sec-miprogreso" class="seccion"><div class="card">
+    <div class="card-title">🏆 Mi Progreso de Sílabas</div>
+    <div id="miprogreso-content">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+      <div style="flex:1;min-width:100px;background:#d1fae5;border-radius:14px;padding:14px;text-align:center;border:3px solid #10b981;">
+        <div style="font-size:32px;font-weight:900;color:#059669">9/20</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">✅ Días completados (45%)</div>
+        <div style="background:white;border-radius:8px;margin-top:8px;height:8px;overflow:hidden;">
+          <div style="background:#10b981;height:100%;width:45%;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:100px;background:#d1fae5;border-radius:14px;padding:14px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:#059669">2150</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">⭐ Puntos</div>
+      </div>
+      <div style="flex:1;min-width:100px;background:#fef3c7;border-radius:14px;padding:14px;text-align:center;">
+        <div style="font-size:32px;font-weight:900;color:#d97706">17</div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280">Día actual</div>
+      </div>
+    </div><div style="margin-bottom:18px;"><div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:10px;">📅 Mapa de días</div><div style="display:flex;flex-wrap:wrap;gap:6px;"><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 1</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 2</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 3</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 4</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 5</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 6</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 7</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 8</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #059669;background:#10b981;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;">
+      <span style="font-size:16px">✅</span>
+      <span>Día 9</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 10</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 11</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 12</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 13</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 14</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 15</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">⬜</span>
+      <span>Día 16</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #4f46e5;background:#ede9fe;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4f46e5;">
+      <span style="font-size:16px">🔵</span>
+      <span>Día 17</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">🔒</span>
+      <span>Día 18</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">🔒</span>
+      <span>Día 19</span>
+    </div><div style="width:52px;height:52px;border-radius:10px;border:2px solid #e5e7eb;background:#f3f4f6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#9ca3af;">
+      <span style="font-size:16px">🔒</span>
+      <span>Día 20</span>
+    </div></div></div><div style="margin-bottom:18px;"><div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:10px;">📋 Secciones del Día 17</div><div style="display:flex;flex-wrap:wrap;gap:6px;"><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#d1fae5;color:#059669;border:2px solid #059669">
+      🔤 ✓
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#d1fae5;color:#059669;border:2px solid #059669">
+      ⭐ ✓
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#d1fae5;color:#059669;border:2px solid #059669">
+      📖 ✓
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#d1fae5;color:#059669;border:2px solid #059669">
+      ✏️ ✓
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#d1fae5;color:#059669;border:2px solid #059669">
+      📝 ✓
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb">
+      ✍️ 
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb">
+      🔍 
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb">
+      🎲 
+    </div><div style="padding:6px 12px;border-radius:20px;font-size:13px;font-weight:800;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb">
+      🔗 
+    </div></div></div><div style="margin-bottom:14px;">
+    <div style="font-size:14px;font-weight:800;color:#374151;margin-bottom:8px;">🔤 Mis sílabas</div>
+    <div style="background:#ede9fe;border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+      <span style="font-size:14px;font-weight:800;color:#4f46e5">🌟 Dominadas: 38 / 88</span>
+    </div>
+    <div class="progreso-sil-grid"><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ba</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ca</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">cha</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">da</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">fa</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ga</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ha</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ja</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">la</span><span class="progreso-sil-pct">89%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ma</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">na</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">pa</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ra</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">sa</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ta</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">va</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ya</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">za</span><span class="progreso-sil-pct">86%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">be</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card aprendiendo"><span style="font-size:18px">📈</span><span class="progreso-sil-txt">ce</span><span class="progreso-sil-pct">67%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">che</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">de</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">fe</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ge</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">he</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">je</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">le</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">me</span><span class="progreso-sil-pct">80%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ne</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">pe</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">que</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">re</span><span class="progreso-sil-pct">89%</span></div><div class="progreso-sil-card aprendiendo"><span style="font-size:18px">📈</span><span class="progreso-sil-txt">se</span><span class="progreso-sil-pct">75%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">te</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ve</span><span class="progreso-sil-pct">86%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ye</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">bi</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">chi</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ci</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">di</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">fi</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">gi</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">gui</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">hi</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ji</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ki</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">li</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">mi</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ni</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">pi</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ri</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">si</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">ti</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">vi</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">bo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">co</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">cho</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">do</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">fo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">go</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">ho</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">jo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">lo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">mo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">no</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">po</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">ro</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">so</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">to</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">vo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">yo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">⬜</span><span class="progreso-sil-txt">zo</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">bu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">chu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">cu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">du</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">fu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">gu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">hu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ju</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">llu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">mu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card domina"><span style="font-size:18px">🌟</span><span class="progreso-sil-txt">pu</span><span class="progreso-sil-pct">100%</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">ru</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">su</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">tu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">vu</span><span class="progreso-sil-pct">Vista</span></div><div class="progreso-sil-card sin-datos"><span style="font-size:18px">👁</span><span class="progreso-sil-txt">zu</span><span class="progreso-sil-pct">Vista</span></div></div>
+  </div></div>
+  </div></div>
+    <div id="sec-reporte" class="seccion"></div>
+
+    <div style="margin-top:28px;padding:14px 18px;background:white;border-radius:14px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:14px;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+      <img class="logo-ltp" style="width:48px;height:48px;flex-shrink:0;" src="data:image/png;base64,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fuedd2jkyJEUFxdH06ZNo2+++aYTIxARtbW10VVXXUXjx4+nESNG0IgRI+jKK6+kbdu2kSzLtHz5cho3bhy98847JMsyVVVV0QUXXEDTp0+ntrY2euCBB2j8+PE0evRoSktLo6FDh9Itt9xCsizTvffeS+PHj6d169YREdHGjRtp3Lhx9NxzzxERUWNjIz300EPUr18/6t27N91yyy1UWlraLdN4GYQiEUmZmZk/AdBER0f3wxneeuh0GDksy7K48sorU0tKSoiIBEmS5O6YYOrUqQSAYmJiKDU1VY3r7N+/n958800CQNdddx0REb388svq8bi4OPXvn3/+uZMEaGlpIX9/fwJAAwcOpPj4eAJAycnJRET01FNPEQC65557iIioqKhIvVZzczOlpaURAIqIiKCUlBSKi4ujK664goiIBg8eTAAoNjaWHA4HrVy5kgDQVVddRbIs07Rp08iDplJoaCgBoL59+1J9ff0R9oYsyyQIgkxEwuHDh2nOnDkpCQkJISEhISO7iWT3rJt92kUCw8g//fQT/8UXX+z/6quvXgfAH20DDWWzyrfffhv79u3D5MmTAXQ0vlaO+fn5QRRFvPHGG+B5HmvWrEFxcTHmz58PAHj77bePQO/8/PzAcRw2b96Mn3/+GTqdTs0FVJpPKBXDLMvCZDLB19cXDMOov33rrbewa9cubNmyBStWrAARwWQygeM4WK1WvPrqqwgODu5oshEWhr179+L7779HcnIy9u3bh8LCQowdOxY5OTlYu3btEXsmeOwIGQC/du3a15cvX57r4+PD1tbWbsNp3mz1jPg+EydOlIiIffDBB5/YsmXLIQCc3E2sWRRFSJKExx9/HBdeeCG2bNmCiIgIjBs3Dm1tbWolUE1NDSoqKhAaGopp06aBYRi1SVV+fr5qIHobd5IkITU1FUOHDoXL5cLChQvVxJCuBqlSZawYn5IkYebMmfD19VXL25VjsizDx8cHr732GjZv3qy6mfn5+WqzzaioKJhMJkyfPh0syyI/P/8II9WTsc1t3br14H333fc4EXE5OTnVZ4I+Z8oBpoyMDIZhmLY333zznurqapFlWUlpctFdN7INGzaAYRgsW7ZMbWatWPRKpE4URfU3iuWtWPhdPQ8AGDduHGbNmgU/Pz+8++67aGlpgU6nA8Mw6r8+Pj6ddkxRmGnOnDl46qmn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">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#1e1b4b;">Liceo Técnico Profesional de Río Bueno</div>
+        <div style="font-size:16px;color:#6b7280;">Programa de Integración Escolar (PIE)</div>
+        <div style="font-size:16px;color:#4f46e5;font-weight:700;">Creador: Álvaro Barra Sáez</div>
+      </div>
+    </div></div>
 
 <!-- Panel docente -->
 <div class="docente-overlay" id="panel-docente" style="display:none">
@@ -470,7 +1037,7 @@ body{
 </div>
 
 <!-- Login por RUT -->
-<div class="login-screen" id="login-screen">
+<div class="login-screen" id="login-screen" style="display: flex;">
   <div class="login-card">
     <img class="login-logo-img logo-ltp" src="data:image/png;base64,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fuedd2jkyJEUFxdH06ZNo2+++aYTIxARtbW10VVXXUXjx4+nESNG0IgRI+jKK6+kbdu2kSzLtHz5cho3bhy98847JMsyVVVV0QUXXEDTp0+ntrY2euCBB2j8+PE0evRoSktLo6FDh9Itt9xCsizTvffeS+PHj6d169YREdHGjRtp3Lhx9NxzzxERUWNjIz300EPUr18/6t27N91yyy1UWlraLdN4GYQiEUmZmZk/AdBER0f3wxneeuh0GDksy7K48sorU0tKSoiIBEmS5O6YYOrUqQSAYmJiKDU1VY3r7N+/n958800CQNdddx0REb388svq8bi4OPXvn3/+uZMEaGlpIX9/fwJAAwcOpPj4eAJAycnJRET01FNPEQC65557iIioqKhIvVZzczOlpaURAIqIiKCUlBSKi4ujK664goiIBg8eTAAoNjaWHA4HrVy5kgDQVVddRbIs07Rp08iDplJoaCgBoL59+1J9ff0R9oYsyyQIgkxEwuHDh2nOnDkpCQkJISEhISO7iWT3rJt92kUCw8g//fQT/8UXX+z/6quvXgfAH20DDWWzyrfffhv79u3D5MmTAXQ0vlaO+fn5QRRFvPHGG+B5HmvWrEFxcTHmz58PAHj77bePQO/8/PzAcRw2b96Mn3/+GTqdTs0FVJpPKBXDLMvCZDLB19cXDMOov33rrbewa9cubNmyBStWrAARwWQygeM4WK1WvPrqqwgODu5oshEWhr179+L7779HcnIy9u3bh8LCQowdOxY5OTlYu3btEXsmeOwIGQC/du3a15cvX57r4+PD1tbWbsNp3mz1jPg+EydOlIiIffDBB5/YsmXLIQCc3E2sWRRFSJKExx9/HBdeeCG2bNmCiIgIjBs3Dm1tbWolUE1NDSoqKhAaGopp06aBYRi1SVV+fr5qIHobd5IkITU1FUOHDoXL5cLChQvVxJCuBqlSZawYn5IkYebMmfD19VXL25VjsizDx8cHr732GjZv3qy6mfn5+WqzzaioKJhMJkyfPh0syyI/P/8II9WTsc1t3br14H333fc4EXE5OTnVZ4I+Z8oBpoyMDIZhmLY333zznurqapFlWUlpctFdN7INGzaAYRgsW7ZMbWatWPRKpE4URfU3iuWtWPhdPQ8AGDduHGbNmgU/Pz+8++67aGlpgU6nA8Mw6r8+Pj6ddkxRmGnOnDl46qmn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" alt="LTP Río Bueno" style="width:80px;height:80px;">
     <h2>Lectura Activa</h2>
@@ -974,7 +1541,6 @@ async function cargarNube(binId){
 async function guardarNube(){
   if(!binIdActual || modoInvitado) return;
   _necesitaGuardar = false;
-  console.log('🌐 Guardando en nube para BIN:', binIdActual);
   const secLogradas = {};
   for(let i=0;i<20;i++){
     if(_secLogradasCache[i]) { secLogradas[i] = _secLogradasCache[i]; continue; }
@@ -989,7 +1555,6 @@ async function guardarNube(){
     silabaStats
   };
   try{
-    console.log('📤 Enviando datos:', {nombre: datos.nombre, diaActual: datos.diaActual, puntos: datos.puntos, diasComp: datos.diasComp.length, secLogradas: Object.keys(datos.secLogradas).length});
     const resp = await fetch(JSONBIN_BASE+'/'+binIdActual,{
       method:'PUT',
       headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY},
@@ -998,7 +1563,6 @@ async function guardarNube(){
     if(!resp.ok) {
       console.error('❌ Error guardando en nube:', resp.status, resp.statusText);
     } else {
-      console.log('✅ Datos guardados en nube exitosamente');
     }
   } catch(e){ console.error('❌ Error al guardar en nube:', e); }
 }
@@ -1106,7 +1670,6 @@ function cargarVoces(){
     || todas.find(v => v.lang.startsWith('es') && v.name !== vozPaulina?.name)
     || todas.find(v => v.lang.startsWith('es'));
   actualizarUI_Voz();
-  console.log('Voces:', todas.filter(v=>v.lang.startsWith('es')).map(v=>v.name));
 }
 
 
@@ -2056,27 +2619,60 @@ function buildNav(){
   const nav=document.getElementById('navDias');
   nav.innerHTML='';
   DIAS.forEach((d,i)=>{
-    const b=document.createElement('button');
-    const comp=diasComp.has(i);
-    const activo=i===diaActual;
-    const bloqueado=!modoInvitado && i>diaActual;
-    b.className='dia-btn'+(comp?' completado':'')+(activo?' activo':'');
-    b.textContent='Día '+(i+1);
-    if(bloqueado){
-      b.style.opacity='0.35';
-      b.style.cursor='not-allowed';
-      b.title='Esperando habilitación del docente';
-      b.onclick=()=>mostrarBurbuja('🔒 Tu docente habilitará este día cuando estés lista');
-    } else {
-      b.onclick=()=>{diaActual=i;buildNav();renderDia();};
+    try {
+      const b=document.createElement('button');
+      const comp=diasComp.has(i);
+      const activo=i===diaActual;
+      const bloqueado=!modoInvitado && i>diaActual;
+      b.className='dia-btn'+(comp?' completado':'')+(activo?' activo':'');
+      b.textContent='Día '+(i+1);
+      if(bloqueado){
+        b.style.opacity='0.35';
+        b.style.cursor='not-allowed';
+        b.title='Esperando habilitación del docente';
+        b.onclick=()=>mostrarBurbuja('🔒 Tu docente habilitará este día cuando estés lista');
+      } else {
+        b.onclick=()=>{
+          try {
+            diaActual=i;
+            buildNav();
+            renderDia();
+          } catch(e) {
+            console.error(`❌ Error al cambiar a Día ${i+1}:`, e);
+            alert(`Error: ${e.message}`);
+          }
+        };
+      }
+      nav.appendChild(b);
+    } catch(e) {
+      console.error(`❌ Error creando botón para Día ${i+1}:`, e);
     }
-    nav.appendChild(b);
   });
 }
 
 function renderDia(){
+  
+  // LIMPIAR TODAS LAS VARIABLES DE SECCIÓN DEL DÍA ANTERIOR
   palabraFormada=[];
-  _silActiva=0; Object.keys(_silToques).forEach(k=>delete _silToques[k]);
+  armarIdx=0;
+  armarFormada=[];
+  _silActiva=0;
+  Object.keys(_silToques).forEach(k=>delete _silToques[k]);
+  
+  // Limpiar sessionStorage de la sección anterior
+  sessionStorage.removeItem('pd_tocada_'+diaActual);
+  sessionStorage.removeItem('lec_tocadas_'+diaActual);
+  
+  // Reiniciar variables de lotería
+  lotSilabaActual = '';
+  lotPuntosRonda = 0;
+  lotRespuestaVisible = false;
+  
+  // Reiniciar variables de discriminación
+  discPreguntas=[];
+  discIdx=0;
+  discPuntos=0;
+  
   const d=DIAS[diaActual];
   const c=document.getElementById('contenidoDia');
   c.innerHTML=`
@@ -2138,7 +2734,6 @@ function setSecLograda(sec, dia = diaActual){
   _secLogradasCache[dia] = logradas;
   // Marcar para guardado inmediato en nube
   _necesitaGuardar = true;
-  console.log(`✅ Sección ${sec} guardada para Día ${dia+1}. Seclogradas:`, logradas);
 }
 
 function secDesbloqueada(sec){
@@ -2450,13 +3045,11 @@ function seccionCompletada(sec){
 
 function confirmarLogrado(sec, msgVoz){
   sonidoBien();
-  console.log(`🎯 Intentando confirmar sección ${sec}...`);
   // Validar que la sección esté realmente completada
   if(!seccionCompletada(sec)) {
     console.warn(`❌ Sección ${sec} no está completada`);
     return;
   }
-  console.log(`✅ Sección ${sec} está completada, guardando...`);
   const nom = nombreAlumna || '';
   // Actualizar estado
   setSecLograda(sec);
@@ -3042,36 +3635,50 @@ function htmlArmarPalabra(d){
 }
 function renderArmarEj(d,idx){
   if(!d)d=DIAS[diaActual];
-  if(idx>=d.ejercicios.length) return`<div class="completado-overlay"><div class="trofeo">🏆</div><h2>¡Todas las palabras armadas!</h2><p>¡Excelente trabajo!</p><div class="sec-logrado-wrap" style="margin-top:16px"><button class="btn-sec-logrado" onclick="confirmarLogrado('armar','¡Fantástico! Armaste todas las palabras.')">🏅 ¡Logré armar palabras!</button></div><button class="speed-btn" style="margin-top:8px" onclick="armarIdx=0;armarFormada=[];document.getElementById('armar-contenido').innerHTML=renderArmarEj(null,0)">🔄 Repetir</button></div>`;
-  const ej=d.ejercicios[idx];armarFormada=[];
+  if(idx>=d.ejercicios.length){
+    return '<div class="completado-overlay">'
+      +'<div class="trofeo">🏆</div>'
+      +'<h2>¡Todas las palabras armadas!</h2>'
+      +'<p>¡Excelente trabajo!</p>'
+      +'<div class="sec-logrado-wrap" style="margin-top:16px">'
+      +'<button class="btn-sec-logrado" onclick="confirmarLogrado(\'armar\',\'¡Fantástico! Armaste todas las palabras.\')">'
+      +'🏅 ¡Logré armar palabras!</button></div>'
+      +'<button class="speed-btn" style="margin-top:8px" onclick="armarIdx=0;armarFormada=[];document.getElementById(\'armar-contenido\').innerHTML=renderArmarEj(null,0)">🔄 Repetir</button>'
+      +'</div>';
+  }
+  const ej=d.ejercicios[idx];
+  armarFormada=[];
+  window._armarPalabra=ej.palabra;
   const banco=[...ej.opciones].sort(()=>Math.random()-.5);
   const prog=Math.round((idx/d.ejercicios.length)*100);
-  const instruccion = 'Forma la palabra ' + ej.palabra;
-  // Guardar instrucción para leer al tocar el botón
-  window._armarInstruccion = instruccion;
-  window._armarPalabra = ej.palabra;
-  return`<div>
-    <div class="progreso-bar-wrap"><div class="progreso-bar" style="width:${prog}%"></div></div>
-    <p style="font-size:16px;color:#6b7280;margin-bottom:8px">Ejercicio ${idx+1} de ${d.ejercicios.length}</p>
-    <div style="background:#e0e7ff;border:4px solid #3730a3;border-radius:20px;padding:20px;text-align:center;margin-bottom:18px;">
-      <p style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:14px;">
-        Forma la palabra: <span style="font-size:32px;color:#3730a3;letter-spacing:3px;">${ej.palabra.toUpperCase()}</span>
-      </p>
-      <button onclick="hablar(window._armarInstruccion, velocidad)"
-        style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">
-        🔊 Escuchar instrucción
-      </button>
-    </div>
-    <p class="armar-pista">Toca las sílabas en el orden correcto 👇</p>
-    <div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${banco.map((op,bi)=>`<button class="armar-sil-opcion" id="armar_${bi}_${op.replace(/[^a-z0-9]/gi,'_')}" onclick="agregarArmar('${op}',this)">${op}</button>`).join('')}</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-verificar" onclick="verificarArmar('${ej.palabra}','${ej.silabas.join('-')}',${idx})">✅ Verificar</button>
-      <button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar palabra</button>
-      <button class="speed-btn" onclick="armarFormada=[];document.getElementById('armar-zona').innerHTML='<span style=color:#9ca3af;font-size:18px>Toca las sílabas...</span>';document.querySelectorAll('.armar-sil-opcion').forEach(b=>b.disabled=false)">🗑 Borrar</button>
-    </div>
-    <div id="armar-fb" class="feedback"></div>
-  </div>`;
+  
+  let botonesHtml='';
+  banco.forEach((op,bi)=>{
+    const safeId='armar_'+bi+'_'+op.replace(/[^a-z0-9]/gi,'_');
+    botonesHtml+='<button class="armar-sil-opcion" id="'+safeId+'" onclick="agregarArmar(\''+op+'\',this)">'+op+'</button>';
+  });
+  
+  return '<div>'
+    +'<div class="progreso-bar-wrap"><div class="progreso-bar" style="width:'+prog+'%"></div></div>'
+    +'<p style="font-size:16px;color:#6b7280;margin-bottom:8px">Ejercicio '+(idx+1)+' de '+d.ejercicios.length+'</p>'
+    +'<div style="background:#e0e7ff;border:4px solid #3730a3;border-radius:20px;padding:20px;text-align:center;margin-bottom:18px;">'
+    +'<p style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:14px;">'
+    +'Forma la palabra: <span style="font-size:32px;color:#3730a3;letter-spacing:3px;">'+ej.palabra.toUpperCase()+'</span>'
+    +'</p>'
+    +'<button onclick="hablar(\'Forma la palabra '+ej.palabra+'\',velocidad)" '
+    +'style="background:#1e1b4b;color:white;border:none;padding:16px 32px;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;gap:10px;">'
+    +'🔊 Escuchar instrucción</button>'
+    +'</div>'
+    +'<p class="armar-pista">Toca las sílabas en el orden correcto 👇</p>'
+    +'<div class="armar-zona" id="armar-zona"><span style="color:#9ca3af;font-size:18px">Toca las sílabas...</span></div>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'+botonesHtml+'</div>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+    +'<button class="btn-verificar" onclick="verificarArmar(\''+ej.palabra+'\',\''+ej.silabas.join('-')+'\','+idx+')">✅ Verificar</button>'
+    +'<button class="speed-btn" onclick="hablar(window._armarPalabra,velocidad)">🔊 Escuchar</button>'
+    +'<button class="speed-btn" onclick="armarFormada=[];var z=document.getElementById(\'armar-zona\');if(z)z.innerHTML=\'Toca las sílabas...\';document.querySelectorAll(\'.armar-sil-opcion\').forEach(function(b){b.disabled=false})">🗑 Borrar</button>'
+    +'</div>'
+    +'<div id="armar-fb" class="feedback"></div>'
+    +'</div>';
 }
 function agregarArmar(sil, btn){
   armarFormada.push(sil);
@@ -3089,13 +3696,19 @@ function verificarArmar(palabra,silStr,idx){
     puntos+=5;guardar();const pts=document.getElementById('pts');if(pts)pts.textContent='⭐ '+puntos;
     armarIdx++;
     const d=DIAS[diaActual];
-    // Renderizar siguiente ejercicio o mensaje de completado
+    // Renderizar siguiente ejercicio
     setTimeout(()=>{
       const c=document.getElementById('armar-contenido');
       if(c){
-        c.innerHTML=renderArmarEj(null,armarIdx);
+        try{
+          c.innerHTML=renderArmarEj(null,armarIdx);
+          c.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }catch(e){
+          console.error('Error armar:',e);
+          alert('Error al cargar siguiente ejercicio: '+e.message);
+        }
       }
-    },1600);
+    },800);
   } else {
     if(fb){fb.className='feedback error';fb.textContent='¡Casi! Escucha y vuelve a intentarlo.';}
     armarFormada=[];const zona=document.getElementById('armar-zona');if(zona)zona.innerHTML='<span style="color:#9ca3af;font-size:14px">Toca las sílabas...</span>';
@@ -3204,46 +3817,69 @@ function renderMiProgreso(){const el=document.getElementById('miprogreso-content
 
 // ── Avanzar día (solo docente) ──────────────────────────
 function avanzarDiaDocente(){
-  if(diaActual>=DIAS.length-1){alert('¡La estudiante ya completó los 20 días!');return;}
+  if(diaActual>=DIAS.length-1){
+    console.error('❌ Ya en último día');
+    alert('¡La estudiante ya completó los 20 días!');
+    return;
+  }
   const sig=diaActual+1;
-  if(!confirm('¿Avanzar a '+nombreAlumna+' al Día '+(sig+1)+'? Esto le permitirá acceder al siguiente día.')) return;
-  diaActual=sig;guardar();buildNav();renderDia();cargarDatosPanel();
-  cerrarPanelDocente();
-  mostrarBurbuja('✅ Avanzado al Día '+(diaActual+1));
+  if(!confirm('¿Avanzar a '+nombreAlumna+' al Día '+(sig+1)+'? Esto le permitirá acceder al siguiente día.')) {
+    return;
+  }
+  try {
+    diaActual=sig;
+    guardar();
+    buildNav();
+    renderDia();
+    cargarDatosPanel();
+    cerrarPanelDocente();
+    mostrarBurbuja('✅ Avanzado al Día '+(diaActual+1));
+  } catch(e) {
+    console.error('❌ Error durante avance:', e);
+    alert('❌ Error al avanzar de día: ' + e.message);
+  }
 }
 
 function reiniciarDiaDocente(){
   const sel = document.getElementById('dp-dia-reset-sel');
   if(!sel || sel.value === '') {
+    console.error('❌ No se seleccionó un día');
     alert('Selecciona primero un día para reiniciar.');
     return;
   }
   const diaReset = parseInt(sel.value);
   const diaNum = diaReset + 1;
-  if(!confirm('⚠️ ¿Reiniciar el Día '+diaNum+' de '+nombreAlumna+'?\n\nEsto borrará todas las secciones completadas de ese día.\nLa estudiante deberá completarlo nuevamente.\n\nEsta acción NO se puede deshacer.')) return;
-
-  // 1. Borrar secLogradas del día reiniciado
-  delete _secLogradasCache[diaReset];
-  localStorage.removeItem('sec_'+diaReset);
-
-  // 2. Si el día estaba completado, sacarlo de diasComp
-  diasComp.delete(diaReset);
-
-  // 3. Si diaActual era mayor al día reiniciado, retroceder
-  if(diaActual > diaReset){
-    diaActual = diaReset;
+  if(!confirm('⚠️ ¿Reiniciar el Día '+diaNum+' de '+nombreAlumna+'?\n\nEsto borrará todas las secciones completadas de ese día.\nLa estudiante deberá completarlo nuevamente.\n\nEsta acción NO se puede deshacer.')) {
+    return;
   }
 
-  // 4. Restar puntos (10 por día completado + 5 por sección, aprox)
-  puntos = Math.max(0, puntos - 10);
+  try {
+    // 1. Borrar secLogradas del día reiniciado
+    delete _secLogradasCache[diaReset];
+    localStorage.removeItem('sec_'+diaReset);
 
-  // 5. Guardar y actualizar
-  guardar();
-  buildNav();
-  renderDia();
-  cargarDatosPanel();
-  cerrarPanelDocente();
-  mostrarBurbuja('🔄 Día '+diaNum+' reiniciado correctamente');
+    // 2. Si el día estaba completado, sacarlo de diasComp
+    diasComp.delete(diaReset);
+
+    // 3. Si diaActual era mayor al día reiniciado, retroceder
+    if(diaActual > diaReset){
+      diaActual = diaReset;
+    }
+
+    // 4. Restar puntos (10 por día completado + 5 por sección, aprox)
+    puntos = Math.max(0, puntos - 10);
+
+    // 5. Guardar y actualizar
+    guardar();
+    buildNav();
+    renderDia();
+    cargarDatosPanel();
+    cerrarPanelDocente();
+    mostrarBurbuja('🔄 Día '+diaNum+' reiniciado correctamente');
+  } catch(e) {
+    console.error('❌ Error durante reinicio:', e);
+    alert('❌ Error al reiniciar día: ' + e.message);
+  }
 }
 
 // La app espera el login. Si ya hay sesión en localStorage la restaura.
