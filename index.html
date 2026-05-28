@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_59.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_62.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -933,32 +933,53 @@ async function loginConRut(){
     setTimeout(()=>inp.classList.remove('error'),600); return;
   }
   errEl.textContent=''; sav.classList.add('vis');
+  
+  let datos = null;
+  let usandoLocal = false;
+  
   try{
-    const datos = await cargarNube(alumna.bin);
+    datos = await cargarNube(alumna.bin);
     binIdActual = alumna.bin;
-    nombreAlumna = datos.nombre || alumna.nombre;
-    puntos = datos.puntos || 0;
-    diasComp = new Set(datos.diasComp || []);
-    diaActual = datos.diaActual || 0;
-    if(datos.silabaStats) silabaStats = datos.silabaStats;
-    else cargarStatsLocal();
-    // Restaurar secLogradas al localStorage para compatibilidad
-    if(datos.secLogradas){
-      Object.entries(datos.secLogradas).forEach(([k,v])=>{
-        localStorage.setItem('sec_'+k, JSON.stringify(v));
-      });
-    }
-    if(datos.obs) localStorage.setItem('obs_docente', datos.obs);
-    // Ocultar login, mostrar app
-    document.getElementById('login-screen').style.display='none';
-    actualizarHeaderNombre();
-    buildNav(); renderDia();
-    setTimeout(()=>{cargarVoces();actualizarUI_Voz();aplicarLogos();actualizarTabs();},400);
-    hablar('Hola ' + nombreAlumna + ', bienvenida. Continuamos donde quedaste.', velocidad);
-    mostrarBurbuja('👋 ¡Hola, ' + nombreAlumna + '!');
   } catch(e){
-    errEl.textContent='Error de conexión. Verifica internet e intenta de nuevo.';
-    sav.classList.remove('vis');
+    console.error('Error al cargar nube para '+alumna.nombre+':', e);
+    // Fallback: usar datos locales si existen
+    const localData = localStorage.getItem('backup_'+alumna.bin);
+    if(localData){
+      try{ datos = JSON.parse(localData); usandoLocal = true; }
+      catch(e2){ datos = null; }
+    }
+    if(!datos){
+      // Si no hay datos locales, crear perfil vacío para que pueda entrar
+      datos = { nombre: alumna.nombre, puntos: 0, diasComp: [], diaActual: 0 };
+      usandoLocal = true;
+    }
+    binIdActual = alumna.bin; // Igual guardar el bin para intentar sync después
+  }
+  
+  nombreAlumna = datos.nombre || alumna.nombre;
+  puntos = datos.puntos || 0;
+  diasComp = new Set(datos.diasComp || []);
+  diaActual = datos.diaActual || 0;
+  if(datos.silabaStats) silabaStats = datos.silabaStats;
+  else cargarStatsLocal();
+  if(datos.secLogradas){
+    Object.entries(datos.secLogradas).forEach(([k,v])=>{
+      localStorage.setItem('sec_'+k, JSON.stringify(v));
+    });
+  }
+  if(datos.obs) localStorage.setItem('obs_docente', datos.obs);
+  
+  // Ocultar login, mostrar app
+  document.getElementById('login-screen').style.display='none';
+  sav.classList.remove('vis');
+  actualizarHeaderNombre();
+  buildNav(); renderDia();
+  setTimeout(()=>{cargarVoces();actualizarUI_Voz();aplicarLogos();actualizarTabs();},400);
+  hablar('Hola ' + nombreAlumna + ', bienvenida. Continuamos donde quedaste.', velocidad);
+  if(usandoLocal){
+    mostrarBurbuja('👋 ¡Hola, ' + nombreAlumna + '! (sin conexión — progreso guardado localmente)');
+  } else {
+    mostrarBurbuja('👋 ¡Hola, ' + nombreAlumna + '!');
   }
 }
 
@@ -966,7 +987,12 @@ async function cargarNube(binId){
   const r = await fetch(JSONBIN_BASE+'/'+binId+'/latest',{
     headers:{'X-Master-Key': JSONBIN_KEY}
   });
-  if(!r.ok) throw new Error('Error al leer bin');
+  if(!r.ok) {
+    const status = r.status;
+    if(status === 404) throw new Error('Bin no encontrado ('+binId+')');
+    if(status === 401) throw new Error('Sin autorización');
+    throw new Error('Error HTTP '+status);
+  }
   const j = await r.json();
   return j.record;
 }
@@ -1831,46 +1857,89 @@ function renderPanelDocente(){
   document.getElementById('pdoc-dias-prom').textContent=diasProm+'/20';
   document.getElementById('pdoc-pts-prom').textContent='⭐'+ptsProm;
   // Tarjetas alumnas
-  lista.innerHTML=alumnasDatos.map((a,idx)=>{
+  let html = '';
+  alumnasDatos.forEach(function(a,idx){
     const d=a.datos;
     const color=colores[idx%colores.length];
-    const inicial=(d?d.nombre||a.nombre:a.nombre).charAt(0).toUpperCase();
-    const diasComp=d?(d.diasComp||[]).length:0;
-    const puntos=d?d.puntos||0:0;
-    const pct=Math.round((diasComp/20)*100);
-    const diasDots=Array.from({length:20},(_,i)=>{
+    const nombre=d?d.nombre||a.nombre:a.nombre;
+    const inicial=nombre.charAt(0).toUpperCase();
+    const dias=d?(d.diasComp||[]).length:0;
+    const pts=d?d.puntos||0:0;
+    const pct=Math.round((dias/20)*100);
+    const obsVal=d?d.obs||'':'';
+
+    let diasDots='';
+    for(let i=0;i<20;i++){
       const comp=d&&(d.diasComp||[]).includes(i);
       const act=d&&(d.diaActual||0)===i&&!comp;
-      return`<div class="alumna-dia-dot${comp?' ok':act?' act':''}">${i+1}</div>`;
-    }).join('');
-    const obsVal=d?d.obs||'':'';
-    return`<div class="alumna-card${d?'':' loading'}" id="acard_${idx}">
-      <div class="alumna-card-header">
-        <div class="alumna-avatar" style="background:${color}">${inicial}</div>
-        <div class="alumna-card-info" style="flex:1">
-          <h3>${d?d.nombre||a.nombre:a.nombre} ${d?'':'(sin datos)'}</h3>
-          <p>RUT: ${a.rut} · Bin: ${a.bin.slice(0,8)}...</p>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:900;color:${color}">⭐${puntos}</div>
-          <div style="font-size:16px;color:#6b7280">${diasComp}/20 días</div>
-        </div>
-      </div>
-      <div class="alumna-prog-barra"><div class="alumna-prog-fill" style="width:${pct}%"></div></div>
-      <div style="font-size:11px;color:#6b7280;text-align:right;margin-bottom:6px">${pct}% completado</div>
-      <div class="alumna-dias-grid">${diasDots}</div>
-      <div style="margin-top:12px">
-        <div style="font-size:16px;font-weight:700;color:#374151;margin-bottom:4px">📝 Observaciones del docente</div>
-        <textarea class="pdoc-obs-area" id="obs_${idx}" placeholder="Escribe observaciones sobre ${a.nombre}..."
-          onchange="guardarObsDocente(${idx},this.value)">${obsVal}</textarea>
-      </div>
-      <div class="alumna-acciones">
-        <button class="docente-btn-gris" onclick="editarAlumna(${idx})" style="font-size:16px;padding:7px 12px">✏️ Editar datos</button>
-        <button class="docente-btn-rojo" onclick="reiniciarAlumna(${idx})" style="font-size:16px;padding:7px 12px">🗑 Reiniciar progreso</button>
-        ${idx>=ALUMNAS_DB.length?`<button class="docente-btn-rojo" onclick="eliminarAlumna(${idx})" style="font-size:16px;padding:7px 12px">❌ Eliminar alumna</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
+      diasDots+='<div class="alumna-dia-dot'+(comp?' ok':act?' act':'')+'">'+(i+1)+'</div>';
+    }
+
+    let botones='';
+    botones+='<button class="docente-btn-gris" onclick="editarAlumna('+idx+')" style="font-size:16px;padding:7px 12px">✏️ Editar datos</button>';
+    botones+='<button class="docente-btn-rojo" onclick="reiniciarAlumna('+idx+')" style="font-size:16px;padding:7px 12px">🗑 Reiniciar progreso</button>';
+    if(!d) botones+='<button class="docente-btn-naranja" onclick="inicializarPerfilAlumna('+idx+')" style="font-size:16px;padding:7px 12px">🔧 Inicializar perfil</button>';
+    if(idx>=ALUMNAS_DB.length) botones+='<button class="docente-btn-rojo" onclick="eliminarAlumna('+idx+')" style="font-size:16px;padding:7px 12px">❌ Eliminar alumna</button>';
+
+    html+=''
+      +'<div class="alumna-card'+(d?'':' loading')+'" id="acard_'+idx+'">'
+      +'<div class="alumna-card-header">'
+      +'<div class="alumna-avatar" style="background:'+color+'">'+inicial+'</div>'
+      +'<div class="alumna-card-info" style="flex:1">'
+      +'<h3>'+nombre+(d?'':' (sin datos — clic en 🔧 para reparar)')+'</h3>'
+      +'<p>RUT: '+a.rut+' · Bin: '+a.bin.slice(0,8)+'...</p>'
+      +'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:22px;font-weight:900;color:'+color+'">⭐'+pts+'</div>'
+      +'<div style="font-size:16px;color:#6b7280">'+dias+'/20 días</div>'
+      +'</div></div>'
+      +'<div class="alumna-prog-barra"><div class="alumna-prog-fill" style="width:'+pct+'%"></div></div>'
+      +'<div style="font-size:11px;color:#6b7280;text-align:right;margin-bottom:6px">'+pct+'% completado</div>'
+      +'<div class="alumna-dias-grid">'+diasDots+'</div>'
+      +'<div style="margin-top:12px">'
+      +'<div style="font-size:16px;font-weight:700;color:#374151;margin-bottom:4px">📝 Observaciones del docente</div>'
+      +'<textarea class="pdoc-obs-area" id="obs_'+idx+'" placeholder="Escribe observaciones sobre '+a.nombre+'..." onchange="guardarObsDocente('+idx+',this.value)">'+obsVal+'</textarea>'
+      +'</div>'
+      +'<div class="alumna-acciones">'+botones+'</div>'
+      +'</div>';
+  });
+  lista.innerHTML = html;
+}
+
+async function inicializarPerfilAlumna(idx){
+  const a = alumnasDatos[idx];
+  if(!a) return;
+  if(!confirm('¿Inicializar el perfil de '+a.nombre+' en JSONbin?\n\nEsto creará un perfil nuevo con progreso en cero.\nUsa esto cuando el alumno no puede ingresar.')) return;
+  const datosIni = {
+    nombre: a.nombre,
+    rut: a.rut,
+    puntos: 0,
+    diasComp: [],
+    diaActual: 0,
+    secLogradas: {},
+    obs: '',
+    silabaStats: {}
+  };
+  try{
+    const resp = await fetch(JSONBIN_BASE+'/'+a.bin, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY},
+      body: JSON.stringify(datosIni)
+    });
+    if(resp.ok){
+      mostrarBurbujaPdoc('✅ Perfil de '+a.nombre+' inicializado. Ya puede ingresar.');
+      abrirPanelDocenteCompleto();
+    } else {
+      const status = resp.status;
+      if(status === 404){
+        mostrarBurbujaPdoc('❌ El BIN ID no existe en JSONbin. Debes crear el bin primero en jsonbin.io');
+      } else {
+        mostrarBurbujaPdoc('❌ Error al inicializar perfil ('+status+'). Verifica el BIN ID.');
+      }
+    }
+  } catch(e){
+    mostrarBurbujaPdoc('❌ Error de red al inicializar perfil.');
+  }
 }
 
 async function guardarObsDocente(idx, obs){
