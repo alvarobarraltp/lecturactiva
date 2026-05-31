@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_66.html -->
+<!-- saved from url=(0049)file:///Users/alvarobarra/Downloads/index_68.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -896,6 +896,8 @@ let palabraFormada = [];
 let nombreAlumna = '';
 let binIdActual = '';
 let _secLogradasCache = {};
+let _necesitaGuardar = false;
+let _guardarTimer = null;
 let modoInvitado = false;
 const CLAVE_INVITADO = 'invitado';
 let silabaStats = {};
@@ -2256,15 +2258,25 @@ function cambiarSec(id, btn){
     const nombres = {silabas:'Sílabas',lectura:'Lectura',dictado:'Dictado',ejercicio:'Ejercicio',loteria:'Lotería'};
     mostrarBurbuja('🔒 Primero completa: '+nombres[anterior]);
     hablar('Primero debes completar '+(nombres[anterior]||anterior), velocidad);
-    // Sacudir el tab bloqueado
     if(btn){ btn.style.animation='sacudir .4s'; setTimeout(()=>btn.style.animation='',400); }
     return;
   }
-  setTimeout(aplicarLogos,50);
+  _irSeccion(id);
+  if(btn) btn.classList.add('activo');
+}
+
+function _irSeccion(id){
+  setTimeout(()=>aplicarLogos(),50);
   document.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));
-  document.getElementById('sec-'+id).classList.add('activa');
-  btn.classList.add('activo');
+  const sec = document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('activa');
+  const tabBtn = document.getElementById('tab-btn-'+id);
+  if(tabBtn) tabBtn.classList.add('activo');
+  // Si es asociar, renderizarla
+  if(id==='asociar') renderAsociar();
+  if(id==='miprogreso') renderMiProgreso();
+  if(id==='reporte') renderReporte();
 }
 
 function marcarSecLograda(sec){
